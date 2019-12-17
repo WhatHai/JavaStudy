@@ -1,7 +1,6 @@
-> 原文地址：https://shockerli.net/post/1000-line-mysql-note/ ，JavaGuide 对本文进行了简答排版，新增了目录。
-> 作者：格物
+> 参考文章：https://shockerli.net/post/1000-line-mysql-note/ 
 
-非常不错的总结，强烈建议保存下来，需要的时候看一看。
+平时自己学习MySQL的笔记和一些文章的总结。
 
 <!-- TOC -->
 - [基本操作](#基本操作)
@@ -55,34 +54,59 @@ SHOW VARIABLES -- 显示系统变量信息
 -- 创建库
     CREATE DATABASE[ IF NOT EXISTS] 数据库名 数据库选项
     数据库选项：
-        CHARACTER SET charset_name
-        COLLATE collation_name
+       字符集 CHARACTER SET charset_name
+       校对规则 COLLATE collation_name
+    例如：create database mydb3 character set utf8 collate utf8_unicode_ci
 -- 查看已有库
     SHOW DATABASES[ LIKE 'PATTERN']
--- 查看当前库信息
+-- 查看当前库信息--编码格式
     SHOW CREATE DATABASE 数据库名
 -- 修改库的选项信息
     ALTER DATABASE 库名 选项信息
+    例如修改编码：alter database 数据库 character set utf8
 -- 删除库
     DROP DATABASE[ IF EXISTS] 数据库名
         同时删除该数据库相关的目录及其目录内容
 ```
 
+### 建表规范
+
+
+​    Normal Format, NF
+- 每个表保存一个实体信息
+- 具有一个ID字段作为主键
+- ID主键 + 原子表
+
+1NF, 第一范式
+​        字段不能再分，就满足第一范式。
+2NF, 第二范式
+​        满足第一范式的前提下，不能出现部分依赖。
+​        消除复合主键就可以避免部分依赖。增加单列关键字。
+3NF, 第三范式
+​        满足第二范式的前提下，不能出现传递依赖。
+​        某个字段依赖于主键，而有其他字段依赖于该字段。这就是传递依赖。
+​        将一个实体信息的数据放在一个表内实现。
+
 ### 表的操作 
 
+#### 创建表
+
 ```mysql
--- 创建表
-    CREATE [TEMPORARY] TABLE[ IF NOT EXISTS] [库名.]表名 ( 表的结构定义 )[ 表选项]
+CREATE [TEMPORARY] TABLE[ IF NOT EXISTS] [库名.]表名 ( 表的结构定义 )[ 表选项]
         每个字段必须有数据类型
         最后一个字段后不能有逗号
         TEMPORARY 临时表，会话结束时表自动消失
         对于字段的定义：
             字段名 数据类型 [NOT NULL | NULL] [DEFAULT default_value] [AUTO_INCREMENT] [UNIQUE [KEY] | [PRIMARY] KEY] [COMMENT 'string']
--- 表选项
-    -- 字符集
+```
+
+#### 表选项
+
+```mysql
+-- 字符集
         CHARSET = charset_name
         如果表没有设定，则使用数据库字符集
-    -- 存储引擎
+-- 存储引擎
         ENGINE = engine_name
         表在管理数据时采用的不同的数据结构，结构不同会导致处理方式、提供的特性操作等不同
         常见的引擎：InnoDB MyISAM Memory/Heap BDB Merge Example CSV MaxDB Archive
@@ -91,87 +115,19 @@ SHOW VARIABLES -- 显示系统变量信息
         InnoDB表文件含义：.frm表定义，表空间数据和日志文件
         SHOW ENGINES -- 显示存储引擎的状态信息
         SHOW ENGINE 引擎名 {LOGS|STATUS} -- 显示存储引擎的日志或状态信息
-    -- 自增起始数
+-- 自增起始数
     	AUTO_INCREMENT = 行数
-    -- 数据文件目录
+-- 数据文件目录
         DATA DIRECTORY = '目录'
-    -- 索引文件目录
+-- 索引文件目录
         INDEX DIRECTORY = '目录'
-    -- 表注释
+-- 表注释
         COMMENT = 'string'
-    -- 分区选项
+-- 分区选项
         PARTITION BY ... (详细见手册)
--- 查看所有表
-    SHOW TABLES[ LIKE 'pattern']
-    SHOW TABLES FROM  库名
--- 查看表结构
-    SHOW CREATE TABLE 表名 （信息更详细）
-    DESC 表名 / DESCRIBE 表名 / EXPLAIN 表名 / SHOW COLUMNS FROM 表名 [LIKE 'PATTERN']
-    SHOW TABLE STATUS [FROM db_name] [LIKE 'pattern']
--- 修改表
-    -- 修改表本身的选项
-        ALTER TABLE 表名 表的选项
-        eg: ALTER TABLE 表名 ENGINE=MYISAM;
-    -- 对表进行重命名
-        RENAME TABLE 原表名 TO 新表名
-        RENAME TABLE 原表名 TO 库名.表名 （可将表移动到另一个数据库）
-        -- RENAME可以交换两个表名
-    -- 修改表的字段机构（13.1.2. ALTER TABLE语法）
-        ALTER TABLE 表名 操作名
-        -- 操作名
-            ADD[ COLUMN] 字段定义       -- 增加字段
-                AFTER 字段名          -- 表示增加在该字段名后面
-                FIRST               -- 表示增加在第一个
-            ADD PRIMARY KEY(字段名)   -- 创建主键
-            ADD UNIQUE [索引名] (字段名)-- 创建唯一索引
-            ADD INDEX [索引名] (字段名) -- 创建普通索引
-            DROP[ COLUMN] 字段名      -- 删除字段
-            MODIFY[ COLUMN] 字段名 字段属性     -- 支持对字段属性进行修改，不能修改字段名(所有原有属性也需写上)
-            CHANGE[ COLUMN] 原字段名 新字段名 字段属性      -- 支持对字段名修改
-            DROP PRIMARY KEY    -- 删除主键(删除主键前需删除其AUTO_INCREMENT属性)
-            DROP INDEX 索引名 -- 删除索引
-            DROP FOREIGN KEY 外键    -- 删除外键
--- 删除表
-    DROP TABLE[ IF EXISTS] 表名 ...
--- 清空表数据
-    TRUNCATE [TABLE] 表名
--- 复制表结构
-    CREATE TABLE 表名 LIKE 要复制的表名
--- 复制表结构和数据
-    CREATE TABLE 表名 [AS] SELECT * FROM 要复制的表名
--- 检查表是否有错误
-    CHECK TABLE tbl_name [, tbl_name] ... [option] ...
--- 优化表
-    OPTIMIZE [LOCAL | NO_WRITE_TO_BINLOG] TABLE tbl_name [, tbl_name] ...
--- 修复表
-    REPAIR [LOCAL | NO_WRITE_TO_BINLOG] TABLE tbl_name [, tbl_name] ... [QUICK] [EXTENDED] [USE_FRM]
--- 分析表
-    ANALYZE [LOCAL | NO_WRITE_TO_BINLOG] TABLE tbl_name [, tbl_name] ...
 ```
 
-### 数据操作
-
-```mysql
-/* 数据操作 */ ------------------
--- 增
-    INSERT [INTO] 表名 [(字段列表)] VALUES (值列表)[, (值列表), ...]
-        -- 如果要插入的值列表包含所有字段并且顺序一致，则可以省略字段列表。
-        -- 可同时插入多条数据记录！
-        REPLACE 与 INSERT 完全一样，可互换。
-    INSERT [INTO] 表名 SET 字段名=值[, 字段名=值, ...]
--- 查
-    SELECT 字段列表 FROM 表名[ 其他子句]
-        -- 可来自多个表的多个字段
-        -- 其他子句可以不使用
-        -- 字段列表可以用*代替，表示所有字段
--- 删
-    DELETE FROM 表名[ 删除条件子句]
-        没有条件子句，则会删除全部
--- 改
-    UPDATE 表名 SET 字段名=新值[, 字段名=新值] [更新条件]
-```
-
-### 字符集编码
+#### 字符集编码
 
 ```mysql
 /* 字符集编码 */ ------------------
@@ -194,43 +150,206 @@ SET NAMES GBK;  -- 相当于完成以上三个设置
     COLLATE 校对集编码     设置校对集编码
 ```
 
-### 数据类型(列类型)
+#### 查看表
 
 ```mysql
-/* 数据类型（列类型） */ ------------------
-1. 数值类型
--- a. 整型 ----------
-    类型         字节     范围（有符号位）
-    tinyint     1字节    -128 ~ 127      无符号位：0 ~ 255
-    smallint    2字节    -32768 ~ 32767
-    mediumint   3字节    -8388608 ~ 8388607
-    int         4字节
-    bigint      8字节
-    int(M)  M表示总位数
-    - 默认存在符号位，unsigned 属性修改
-    - 显示宽度，如果某个数不够定义字段时设置的位数，则前面以0补填，zerofill 属性修改
-        例：int(5)   插入一个数'123'，补填后为'00123'
-    - 在满足要求的情况下，越小越好。
-    - 1表示bool值真，0表示bool值假。MySQL没有布尔类型，通过整型0和1表示。常用tinyint(1)表示布尔型。
--- b. 浮点型 ----------
-    类型             字节     范围
-    float(单精度)     4字节
-    double(双精度)    8字节
-    浮点型既支持符号位 unsigned 属性，也支持显示宽度 zerofill 属性。
-        不同于整型，前后均会补填0.
-    定义浮点型时，需指定总位数和小数位数。
-        float(M, D)     double(M, D)
-        M表示总位数，D表示小数位数。
-        M和D的大小会决定浮点数的范围。不同于整型的固定范围。
-        M既表示总位数（不包括小数点和正负号），也表示显示宽度（所有显示符号均包括）。
-        支持科学计数法表示。
-        浮点数表示近似值。
--- c. 定点数 ----------
-    decimal -- 可变长度
-    decimal(M, D)   M也表示总位数，D表示小数位数。
+-- 查看所有表
+    SHOW TABLES[ LIKE 'pattern']
+    SHOW TABLES FROM  库名
+-- 查看表结构
+    SHOW CREATE TABLE 表名 （信息更详细）
+    DESC 表名 / DESCRIBE 表名 / EXPLAIN 表名 / SHOW COLUMNS FROM 表名 [LIKE 'PATTERN']
+    SHOW TABLE STATUS [FROM db_name] [LIKE 'pattern']
+```
+
+#### 修改表
+
+```mysql
+-- 修改表本身的选项
+    ALTER TABLE 表名 表的选项
+    eg: ALTER TABLE 表名 ENGINE=MYISAM;
+-- 对表进行重命名
+    RENAME TABLE 原表名 TO 新表名
+    RENAME TABLE 原表名 TO 库名.表名 （可将表移动到另一个数据库）
+    -- RENAME可以交换两个表名
+-- 修改表的字段机构（13.1.2. ALTER TABLE语法）
+    ALTER TABLE 表名 操作名
+    -- 操作名
+        ADD[ COLUMN] 字段定义       -- 增加字段
+            AFTER 字段名          -- 表示增加在该字段名后面
+            FIRST               -- 表示增加在第一个
+        ADD PRIMARY KEY(字段名)   -- 创建主键
+        ADD UNIQUE [索引名] (字段名)-- 创建唯一索引
+        ADD INDEX [索引名] (字段名) -- 创建普通索引
+        DROP[ COLUMN] 字段名      -- 删除字段
+        MODIFY[ COLUMN] 字段名 字段属性     -- 支持对字段属性进行修改，不能修改字段名(所有原有属性也需写上)
+        CHANGE[ COLUMN] 原字段名 新字段名 字段属性      -- 支持对字段名修改
+        DROP PRIMARY KEY    -- 删除主键(删除主键前需删除其AUTO_INCREMENT属性)
+        DROP INDEX 索引名 -- 删除索引
+        DROP FOREIGN KEY 外键    -- 删除外键
+```
+
+#### 删除表
+
+```mysql
+DROP TABLE[ IF EXISTS] 表名 ...
+```
+
+#### 清空表
+
+```mysql
+TRUNCATE [TABLE] 表名
+```
+
+#### 复制表
+
+```mysql
+-- 复制表结构
+   CREATE TABLE 表名 LIKE 要复制的表名
+-- 复制表结构和数据
+   CREATE TABLE 表名 [AS] SELECT * FROM 要复制的表名
+```
+
+#### 检查表是否错误
+
+```mysql
+CHECK TABLE tbl_name [, tbl_name] ... [option] ...
+```
+
+#### 优化表
+
+```mysql
+OPTIMIZE [LOCAL | NO_WRITE_TO_BINLOG] TABLE tbl_name [, tbl_name] ...
+```
+
+#### 修复表
+
+```mysql
+REPAIR [LOCAL | NO_WRITE_TO_BINLOG] TABLE tbl_name [, tbl_name] ... [QUICK] [EXTENDED] [USE_FRM]
+```
+
+#### 分析表
+
+```mysql
+ANALYZE [LOCAL | NO_WRITE_TO_BINLOG] TABLE tbl_name [, tbl_name] ...
+```
+
+### 数据操作-增删改查
+
+#### 增
+
+```mysql
+INSERT [INTO] 表名 [(字段列表)] VALUES (值列表)[, (值列表), ...]
+    -- 如果要插入的值列表包含所有字段并且顺序一致，则可以省略字段列表。
+    -- 可同时插入多条数据记录！
+    REPLACE 与 INSERT 完全一样，可互换。
+    INSERT [INTO] 表名 SET 字段名=值[, 字段名=值, ...]
+    注意：
+        * 1.列名数与values后面的值的个数相等
+        * 2.列的顺序与插入的值得顺序一致
+        * 3.列名的类型与插入的值要一致.
+        * 4.插入值得时候不能超过最大长度.
+        * 5.值如果是字符串或者日期需要加’’
+插入所有字段
+	insert into student values(1,"mahuan",20);
+插入中文
+	insert into student values(2,"哈",2,98.32);
+向已有数据表添加一列 ：
+	alter table 表名 add 列名 类型(长度) 约束; 
+```
+
+#### auto_increment 自增
+
+```mysql
+要求:
+    1.被修饰的字段类型支持自增. 一般int
+    2.被修饰的字段必须是一个key 一般是primary key
+create table ai01(id varchar(10) auto_increment);
+	-- 错误 Incorrect column specifier for column 'id'
+create table ai01(id int auto_increment);
+	-- 错误 Incorrect table definition; there can be only one auto column and it must be defined as a key
+```
+
+
+
+#### 查
+
+```mysql
+ SELECT 字段列表 FROM 表名[ 其他子句]
+        -- 可来自多个表的多个字段
+        -- 其他子句可以不使用
+        -- 字段列表可以用*代替，表示所有字段
+```
+
+#### 改
+
+```mysql
+UPDATE 表名 SET 字段名=新值[, 字段名=新值] [更新条件]
+update student set age=21,sex="xiaoming" where id=1;
+```
+
+#### 删
+
+```mysql
+DELETE FROM 表名[ 删除条件子句]
+        没有条件子句，则会删除全部
+   truncate 和 delete区别
+   		delete属于DML语句删除数据可恢复  truncate属于DDL语句,不受事务管理，不可恢复
+		delete逐条删除	truncate干掉表,重新创建一张空表
+```
+
+
+
+### 数据类型(列类型)
+
+#### 整型
+
+​	类型             字节    	 范围（有符号位）
+​    tinyint           1字节    	-128 ~ 127      无符号位：0 ~ 255
+​    smallint    	   2字节    	-32768 ~ 32767
+​    mediumint   3字节    	-8388608 ~ 8388607
+​    int         	   4字节
+​    bigint      	   8字节
+
+   **int(M)  	   M表示总位数**
+
+> 默认存在符号位，unsigned 属性修改
+>
+> 显示宽度，如果某个数不够定义字段时设置的位数，则前面以0补填，zerofill 属性修改
+> ​    例：int(5)   插入一个数'123'，补填后为'00123'
+>
+> 在满足要求的情况下，越小越好。
+>
+> 1表示bool值真，0表示bool值假。MySQL没有布尔类型，通过整型0和1表示。常用tinyint(1)表示布尔型。
+
+#### 浮点型
+
+​	类型             		字节    	 范围
+​    float(单精度)     	4字节
+​    double(双精度)    	8字节
+
+> ​    浮点型既支持符号位 unsigned 属性，也支持显示宽度 zerofill 属性。
+> ​        不同于整型，前后均会补填0.
+> ​    定义浮点型时，需指定总位数和小数位数。
+> ​        float(M, D)     double(M, D)
+> ​        M表示总位数，D表示小数位数。
+> ​        M和D的大小会决定浮点数的范围。不同于整型的固定范围。
+> ​        M既表示总位数（不包括小数点和正负号），也表示显示宽度（所有显示符号均包括）。
+> ​        支持科学计数法表示。
+> ​        浮点数表示近似值。
+
+#### 定点数
+
+```mysql
+ decimal -- 可变长度
+ decimal(M, D)   M也表示总位数，D表示小数位数。
     保存一个精确的数值，不会发生数据的改变，不同于浮点数的四舍五入。
-    将浮点数转换为字符串来保存，每9位数字保存为4个字节。
-2. 字符串类型
+    将浮点数转换为字符串来保存，每9位数字保存为4个字节
+```
+
+####  字符串
+
+```mysql
 -- a. char, varchar ----------
     char    定长字符串，速度快，但浪费空间
     varchar 变长字符串，速度慢，但节省空间
@@ -254,8 +373,12 @@ SET NAMES GBK;  -- 相当于完成以上三个设置
 -- c. binary, varbinary ----------
     类似于char和varchar，用于保存二进制字符串，也就是保存字节字符串而非字符字符串。
     char, varchar, text 对应 binary, varbinary, blob.
-3. 日期时间类型
-    一般用整型保存时间戳，因为PHP可以很方便的将时间戳进行格式化。
+```
+
+#### 日期时间
+
+```mysql
+ 一般用整型保存时间戳，因为PHP可以很方便的将时间戳进行格式化。
     datetime    8字节    日期及时间     1000-01-01 00:00:00 到 9999-12-31 23:59:59
     date        3字节    日期         1000-01-01 到 9999-12-31
     timestamp   4字节    时间戳        19700101000000 到 2038-01-19 03:14:07
@@ -280,7 +403,11 @@ year        YYYY
             YY
             YYYY
             YY
-4. 枚举和集合
+```
+
+#### 枚举集和
+
+```mysql
 -- 枚举(enum) ----------
 enum(val1, val2, val3...)
     在已知的值中进行单选。最大数量为65535.
@@ -295,6 +422,8 @@ set(val1, val2, val3...)
     最多可以有64个不同的成员。以bigint存储，共8个字节。采取位运算的形式。
     当创建表时，SET成员值的尾部空格将自动被删除。
 ```
+
+
 
 ### 列属性(列约束)
 
@@ -351,24 +480,7 @@ set(val1, val2, val3...)
 
 ```
 
-### 建表规范
 
-```mysql
-/* 建表规范 */ ------------------
-    -- Normal Format, NF
-        - 每个表保存一个实体信息
-        - 每个具有一个ID字段作为主键
-        - ID主键 + 原子表
-    -- 1NF, 第一范式
-        字段不能再分，就满足第一范式。
-    -- 2NF, 第二范式
-        满足第一范式的前提下，不能出现部分依赖。
-        消除复合主键就可以避免部分依赖。增加单列关键字。
-    -- 3NF, 第三范式
-        满足第二范式的前提下，不能出现传递依赖。
-        某个字段依赖于主键，而有其他字段依赖于该字段。这就是传递依赖。
-        将一个实体信息的数据放在一个表内实现。
-```
 
 ### SELECT 
 
@@ -523,6 +635,8 @@ TRUNCATE [TABLE] tbl_name
 2，truncate 重置auto_increment的值。而delete不会
 3，truncate 不知道删除了几条，而delete知道。
 4，当被用于带分区的表时，truncate 会保留分区
+delete 可以被事务管理 ，在事务中删除数据可以回滚恢复
+truncate 删除所有记录性能上 好于 delete
 ```
 
 ### 备份与还原
