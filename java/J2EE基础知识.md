@@ -1,31 +1,3 @@
-点击关注[公众号](#公众号)及时获取笔主最新更新文章，并可免费领取本文档配套的《Java面试突击》以及Java工程师必备学习资源。
-
-<!-- MarkdownTOC -->
-
-- [Servlet总结](#servlet总结)
-- [阐述Servlet和CGI的区别?](#阐述servlet和cgi的区别)
-    - [CGI的不足之处:](#cgi的不足之处)
-    - [Servlet的优点：](#servlet的优点)
-- [Servlet接口中有哪些方法及Servlet生命周期探秘](#servlet接口中有哪些方法及servlet生命周期探秘)
-- [get和post请求的区别](#get和post请求的区别)
-- [什么情况下调用doGet\(\)和doPost\(\)](#什么情况下调用doget和dopost)
-- [转发（Forward）和重定向（Redirect）的区别](#转发forward和重定向redirect的区别)
-- [自动刷新\(Refresh\)](#自动刷新refresh)
-- [Servlet与线程安全](#servlet与线程安全)
-- [JSP和Servlet是什么关系](#jsp和servlet是什么关系)
-- [JSP工作原理](#jsp工作原理)
-- [JSP有哪些内置对象、作用分别是什么](#jsp有哪些内置对象、作用分别是什么)
-- [Request对象的主要方法有哪些](#request对象的主要方法有哪些)
-- [request.getAttribute\(\)和 request.getParameter\(\)有何区别](#requestgetattribute和-requestgetparameter有何区别)
-- [include指令include的行为的区别](#include指令include的行为的区别)
-- [JSP九大内置对象，七大动作，三大指令](#jsp九大内置对象，七大动作，三大指令)
-- [讲解JSP中的四种作用域](#讲解jsp中的四种作用域)
-- [如何实现JSP或Servlet的单线程模式](#如何实现jsp或servlet的单线程模式)
-- [实现会话跟踪的技术有哪些](#实现会话跟踪的技术有哪些)
-- [Cookie和Session的的区别](#cookie和session的的区别)
-
-<!-- /MarkdownTOC -->
-
 ## Servlet总结
 
 在Java Web程序中，**Servlet**主要负责接收用户请求 `HttpServletRequest`,在`doGet()`,`doPost()`中做相应的处理，并将回应`HttpServletResponse`反馈给用户。**Servlet** 可以设置初始化参数，供Servlet内部使用。一个Servlet类只会有一个实例，在它初始化时调用`init()`方法，销毁时调用`destroy()`方法**。**Servlet需要在web.xml中配置（MyEclipse中创建Servlet会自动配置），**一个Servlet可以设置多个URL访问**。**Servlet不是线程安全**，因此要谨慎使用类变量。
@@ -290,12 +262,4 @@ Cookie 数据保存在客户端(浏览器端)，Session 数据保存在服务器
 
 Cookie 存储在客户端中，而Session存储在服务器上，相对来说 Session 安全性更高。如果使用 Cookie 的一些敏感信息不要写入 Cookie 中，最好能将 Cookie 信息加密然后使用到的时候再去服务器端解密。
 
-## 公众号
 
-如果大家想要实时关注我更新的文章以及分享的干货的话，可以关注我的公众号。
-
-**《Java面试突击》:** 由本文档衍生的专为面试而生的《Java面试突击》V2.0 PDF 版本[公众号](#公众号)后台回复 **"Java面试突击"** 即可免费领取！
-
-**Java工程师必备学习资源:** 一些Java工程师常用学习资源公众号后台回复关键字 **“1”** 即可免费无套路获取。 
-
-![我的公众号](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-6/167598cd2e17b8ec.png)

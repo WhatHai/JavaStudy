@@ -1,11 +1,11 @@
-## redis 简介
+redis 简介
 
 Redis是用C语言开发的一个开源的高性能键值对（key-value）数据库。它通过提供多种键值数据类型来适应不同场景下的存储需求，目前为止Redis支持的键值数据类型如下：
 
 字符串类型、散列类型、列表类型、集合类型、有序集合类型。
 
 - Redis支持数据的持久化，可以将内存中的数据保存在磁盘中，重启的时候可以再次加载进行使用。
-- Redis不仅仅支持简单的key-value类型的数据，同时还提供list，set，zset，hash等数据结构的存储。
+  - Redis不仅仅支持简单的key-value类型的数据，同时还提供list，set，zset，hash等数据结构的存储。
 - Redis支持数据的备份，即master-slave模式的数据备份。
 
  redis 的数据是存在内存中的，所以读写速度非常快，因此 redis 被广泛应用于缓存方向。另外，redis 也经常用来做分布式锁。redis 提供了多种数据类型来支持不同的业务场景。除此之外，redis 支持事务 、持久化、LUA脚本、LRU驱动事件、多种集群方案
@@ -136,7 +136,8 @@ HSET key field value	//一次只能设置一个字段值
 	127.0.0.1:6379> hset user username zhangsan 
 HMSET key field value [field value ...]		//一次可以设置多个字段值
 	127.0.0.1:6379> hmset user age 20 username lisi 
-//HSET命令不区分插入和更新操作，当执行插入操作时HSET命令返回1，当执行更新操作时返回0.
+//HSET命令不区分插入和更新操作，当执行插入操作时HSET命令返回1，当执行更新操作时返回0
+
 ---------------------------------------------
 //取值 
 HGET key field	//一次只能获取一个字段值
