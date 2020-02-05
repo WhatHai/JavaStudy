@@ -1,5 +1,3 @@
-点
-
 ## 资源
 
 - [SQL Tutorial](https://www.w3schools.com/sql/default.asp) （SQL语句学习,英文）、[SQL Tutorial](https://www.w3school.com.cn/sql/index.asp)（SQL语句学习,中文）、[SQL语句在线练习](https://www.w3schools.com/sql/exercise.asp) （非常不错）
