@@ -1,18 +1,4 @@
 
-<!-- MarkdownTOC -->
-
-- [简介](#简介)
-- [内部结构分析](#内部结构分析)
-- [LinkedList源码分析](#linkedlist源码分析)
-    - [构造方法](#构造方法)
-    - [添加（add）方法](#add方法)
-    - [根据位置取数据的方法](#根据位置取数据的方法)
-    - [根据对象得到索引的方法](#根据对象得到索引的方法)
-    - [检查链表是否包含某对象的方法：](#检查链表是否包含某对象的方法：)
-    - [删除（remove/pop）方法](#删除方法)
-- [LinkedList类常用方法测试：](#linkedlist类常用方法测试)
-
-<!-- /MarkdownTOC -->
 
 ## <font face="楷体" id="1">简介</font>
 <font color="red">LinkedList</font>是一个实现了<font color="red">List接口</font>和<font color="red">Deque接口</font>的<font color="red">双端链表</font>。 
