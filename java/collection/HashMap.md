@@ -6,7 +6,7 @@ Map接口下的集合以键值对方式存在的双列集合，key不能相同�
 
 HashMap 主要用来存放键值对，它基于哈希表的Map接口实现
 
-JDK1.8 之前 HashMap 由 数组+链表 组成的，数组是 HashMap 的主体，链表则是主要为了解决哈希冲突而存在的（“拉链法”解决冲突）.JDK1.8 以后在解决哈希冲突时有了较大的变化，当链表长度大于阈值（默认为 8）时，将链表转化为红黑树（将链表转换成红黑树前会判断，如果当前数组的长度小于 64，那么会选择先进行数组扩容，而不是转换为红黑树），以减少搜索时间，具体可以参考 `treeifyBin`方法。
+JDK1.8 之前 HashMap 由 数组+链表 组成的，数组是 HashMap 的主体，链表则是主要为了解决哈希冲突而存在的（“拉链法”解决冲突）.JDK1.8 以后在解决哈希冲突时有了较大的变化，当链表长度大于**阈值**（默认为 8）时，将链表转化为红黑树（将链表转换成红黑树前会判断，如果当前**数组的长度小于 64**，那么会选择先进行数组扩容，而不是转换为红黑树），以减少搜索时间，具体可以参考 `treeifyBin`方法。
 
 ## 底层数据结构分析
 ### JDK1.8之前
@@ -88,7 +88,7 @@ public class HashMap<K,V> extends AbstractMap<K,V> implements Map<K,V>, Cloneabl
 ```
 - **loadFactor加载因子**
 
-  loadFactor加载因子是控制数组存放数据的疏密程度，loadFactor越趋近于1，那么   数组中存放的数据(entry)也就越多，也就越密，也就是会让链表的长度增加，loadFactor越小，也就是趋近于0，数组中存放的数据(entry)也就越少，也就越稀疏。
+  loadFactor加载因子是控制数组存放数据的疏密程度，loadFactor越趋近于1，那么   数组中存放的数据(entry)也就越多，也就越密，也就是会让**链表的长度增加**，loadFactor越小，也就是趋近于0，数组中存放的数据(entry)也就越少，也就越稀疏。
 
   **loadFactor太大导致查找元素效率低，太小导致数组的利用率低，存放的数据会很分散。loadFactor的默认值为0.75f是官方给出的一个比较好的临界值**。 
   
@@ -226,14 +226,14 @@ final void putMapEntries(Map<? extends K, ? extends V> m, boolean evict) {
 ### put方法
 HashMap只提供了put用于添加元素，putVal方法只是给put方法调用的一个方法，并没有提供给用户使用。
 
-HashMap 允许插入键为 null 的键值对。但是因为无法调用 null 的 hashCode() 方法，也就无法确定该键值对的桶下标，只能通过强制指定一个桶下标来存放。HashMap 使用第 0 个桶存放键为 null 的键值对
+HashMap 允许插入键为 null 的键值对。但是因为无法调用 null 的 hashCode() 方法，也就无法确定该键值对的桶下标，只能通过强制指定一个桶下标来存放。**HashMap 使用第 0 个桶存放键为 null 的键值对**
 
-使用链表的头插法，也就是新的键值对插在链表的头部，而不是链表的尾部
+使用链表的**头插法**，也就是新的键值对插在链表的头部，而不是链表的尾部
 
 **对putVal方法添加元素的分析如下：**
 
 - ①如果定位到的数组位置没有元素 就直接插入。
-- ②如果定位到的数组位置有元素就和要插入的key比较，如果key相同就直接覆盖，如果key不相同，就判断p是否是一个树节点，如果是就调用`e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value)`将元素添加进入。如果不是就遍历链表插入(插入的是链表尾部)。
+- ②如果定位到的数组位置有元素就和要插入的key比较，如果key相同就直接覆盖，如果key不相同，就判断p是否是一个树节点，如果是就调用`e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value)`将元素添加进入。如果不是就遍历链表插入(**插入的是链表尾部**)。
 
 ![put方法](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-7/put方法.png)
 
@@ -316,7 +316,7 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 **对于put方法的分析如下：**
 
 - ①如果定位到的数组位置没有元素 就直接插入。
-- ②如果定位到的数组位置有元素，遍历以这个元素为头结点的链表，依次和插入的key比较，如果key相同就直接覆盖，不同就采用头插法插入元素。
+- ②如果定位到的数组位置有元素，遍历以这个元素为头结点的链表，依次和插入的key比较，如果key相同就直接覆盖，不同就采用**头插法插入元素**。
 
 ```java
 public V put(K key, V value)
@@ -367,7 +367,7 @@ public final int hashCode() {
 
 #### 取模
 
-将 key 的 hash 值对桶个数取模：**hash%capacity**，如果能保证 capacity 为 2 的 n 次方，那么就可以将这个操作转换为位运算。
+将 key 的 hash 值对桶个数取模：**hash%capacity**，如果能保证 capacity 为 **2 的 n 次方**，那么就可以将这个操作转换为位运算。
 
 ```java
 static int indexFor(int h, int length) {

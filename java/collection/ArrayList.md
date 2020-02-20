@@ -7,7 +7,9 @@
 可以插入任何元素包括null，初始容量为10，每次添加元素回判断容量如果添加数组超过10，底层开辟一个1.5*10 的新数组，拷贝原数组到新数组，在新数组末尾添加。所以添加元素操作时间不固定，要考虑扩容的开销。
 添加大量元素钱，可以使用 ensureCapacity 操作增加ArrayList实例的容量，
 
-ArrayList擅长随机访问，非同步。所以最好创建时同步操作
+
+
+注意：ArrayList擅长随机访问，非同步。所以最好创建时同步操作
 
 ```java
 List list = Collections.synchronizedList(new ArrayList(...)); 
@@ -30,8 +32,6 @@ List list = Collections.synchronizedList(new ArrayList(...));
 　　和 Vector 不同，**ArrayList 中的操作不是线程安全的**！所以，建议在单线程中才使用 ArrayList，而在多线程中可以选择 Vector 或者  CopyOnWriteArrayList。
 
 # 源码分析
-
-
 
 ```java
 package java.util;
@@ -568,7 +568,6 @@ public class ArrayList<E> extends AbstractList<E>
         }
     }
 
-
    /**
     *构造包含指定collection元素的列表，这些元素利用该集合的迭代器按顺序返回
     *如果指定的集合为null，throws NullPointerException。 
@@ -584,10 +583,7 @@ public class ArrayList<E> extends AbstractList<E>
             this.elementData = EMPTY_ELEMENTDATA;
         }
     }
-
 ```
-
-
 
 
 
@@ -604,7 +600,7 @@ private transient Object[] elementData;
 **Serialization 机制**：持久化对象实例的机制，
 
 ###  System.arraycopy()和Arrays.copyOf()方法
-　　通过上面源码我们发现这两个实现数组复制的方法被广泛使用而且很多地方都特别巧妙。比如下面<font color="red">add(int index, E element)</font>方法就很巧妙的用到了<font color="red">arraycopy()方法</font>让数组自己复制自己实现让index开始之后的所有成员后移一个位置:
+　　通过上面源码我们发现这两个实现数组复制的方法被广泛使用而且很多地方都特别巧妙。比如下面<font color="red">add(int index, E element)</font>方法就很巧妙的用到了<font color="red">System.arraycopy()方法</font>让数组自己复制自己实现让index开始之后的所有成员后移一个位置:
 ```java 
 /**
  * 在此列表中的指定位置插入指定的元素。 
@@ -633,22 +629,28 @@ public Object[] toArray() {
     return Arrays.copyOf(elementData, size);
 }
 ```
+**扩容：需要调用 `Arrays.copyOf()` 把原数组整个复制到新数组中**
+
+**删除/指定插入：需要调用 System.arraycopy() 将 index+1 后面的元素都复制到 index 位置上，该操作的时间复杂度为 O(N)**
+
 #### 两者联系与区别
+
 **联系：**
 ​	看两者源代码可以发现`copyOf()`内部调用了`System.arraycopy()`方法
 **区别：**
 
-1. arraycopy()需要目标数组，将原数组拷贝到你自己定义的数组里，而且可以选择拷贝的起点和长度以及放入新数组中的位置
-2. copyOf()是系统自动在内部新建一个数组，并返回该数组。
+1. System.arraycopy()需要目标数组，将原数组拷贝到你自己定义的数组里，而且可以选择拷贝的起点和长度以及放入新数组中的位置
+2. Arrays.copyOf()是系统自动在内部新建一个数组，并返回该数组。
 ### ArrayList 核心扩容技术
 
 #### 1.  add 方法
 
+将指定的元素追加到此列表的末尾
+
+
+
 ```java
-    /**
-     * 将指定的元素追加到此列表的末尾。 
-     */
-    public boolean add(E e) {
+   public boolean add(E e) {
    //添加元素之前，先调用ensureCapacityInternal方法
         ensureCapacityInternal(size + 1);  // Increments modCount!!
         //这里看到ArrayList添加元素的实质就相当于为数组赋值
@@ -657,9 +659,15 @@ public Object[] toArray() {
     }
 ```
 
-#### 2. 再来看看 ensureCapacityInternal()方法
 
-可以看到 `add` 方法 首先调用了`ensureCapacityInternal(size + 1)`
+
+**add(int index, E element)**：将指定的元素插入此列表中的指定位置
+
+最根本的方法就是 **System.arraycopy()** 方法，该方法的根本目的就是将 index 位置空出来以供新数据插入，这里需要进行数组数据的右移，这是非常麻烦和耗时的，所以如果指定的数据集合需要进行大量插入（中间插入）操作，推荐使用LinkedList
+
+#### 2.  ensureCapacityInternal()方法
+
+可以看到 `add` 方法 首先调用了`ensureCapacityInternal(size + 1)`，扩容检测
 
 ```java
    //得到最小扩容量
@@ -668,7 +676,6 @@ public Object[] toArray() {
               // 获取默认的容量和传入参数的较大值
             minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
         }
-
         ensureExplicitCapacity(minCapacity);
     }
 ```
@@ -689,7 +696,6 @@ public Object[] toArray() {
             //调用grow方法进行扩容，调用此方法代表已经开始扩容了
             grow(minCapacity);
     }
-
 ```
 
 我们来仔细分析一下：
@@ -703,14 +709,10 @@ public Object[] toArray() {
 #### 4. grow()方法 
 
 ```java
-    /**
-     * 要分配的最大数组大小
-     */
-    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
-
-    /**
-     * ArrayList扩容的核心方法。
-     */
+      //要分配的最大数组大小
+   private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+     
+// ArrayList扩容的核心方法。
     private void grow(int minCapacity) {
         // oldCapacity为旧容量，newCapacity为新容量
         int oldCapacity = elementData.length;
@@ -729,7 +731,7 @@ public Object[] toArray() {
     }
 ```
 
-**int newCapacity = oldCapacity + (oldCapacity >> 1),所以 ArrayList 每次扩容之后容量都会变为原来的 1.5 倍！**（JDK1.6  ，扩容之后容量为 1.5 倍+1！）**
+**int newCapacity = oldCapacity + (oldCapacity >> 1),所以 ArrayList 每次扩容之后容量都会变为原来的 1.5 倍！（<font color="red">JDK1.6  ，扩容之后容量为 1.5 倍+1！</font>）**
 
 简介**：移位运算符就是在二进制的基础上对数字进行平移。按照平移的方向和填充数字的规则分为三种:<font color="red"><<(左移)</font>、<font color="red">>>(带符号右移)</font>和<font color="red">>>>(无符号右移)</font>。
 
@@ -769,6 +771,8 @@ public Object[] toArray() {
 
 ​	提供给用户调用的扩容方法，在add 大量元素钱，先调用它
 
+
+
 ### ArrayList内部类
 
 ```java
@@ -782,6 +786,52 @@ public Object[] toArray() {
 其中的**ListItr** 继承 **Itr**，实现了**ListIterator接口**，同时重写了**hasPrevious()**， **nextIndex()**， **previousIndex()**， **previous()**， **set(E e)**， **add(E e)** 等方法
 
  **Iterator和ListIterator的区别:** ListIterator在Iterator的基础上增加了添加对象，修改对象，逆向遍历等方法，这些是Iterator不能实现的。
+
+### contains方法
+
+ArrayList的contains方法原理:底层依赖于equals方法
+
+传入的元素的equals方法依次与集合中的旧元素所比较，从而根据返回的布尔值判断是否有重复元素
+
+当ArrayList存放自定义类型时，由于自定义类型在未重写equals方法前，判断是否重复的依据是地址值，所以如果想根据内容判断是否为重复元素，需要重写元素的equals方法
+
+
+
+### 序列化
+
+使用 transient 修饰，动态数组默认不会被序列化。
+
+ArrayList 实现了 writeObject() 和 readObject() 来控制只序列化数组中有元素填充那部分内容
+
+
+
+### 线程安全ArrayList
+
+可以使用 Collections.synchronizedList(); 得到一个线程安全的 ArrayList。
+
+```java
+List<String> list = new ArrayList<>(); List<String> synList = Collections.synchronizedList(list); 
+```
+
+也可以使用 concurrent 并发包下的 CopyOnWriteArrayList 类。
+
+```java
+List<String> list = new CopyOnWriteArrayList<>(); 
+```
+
+
+
+### CopyOnWriteArrayList
+
+读写分离
+
+写操作在一个复制的数组上进行，读操作还是在原始数组中进行，读写分离，互不影响。
+
+写操作需要加锁，防止并发写入时导致写入数据丢失。
+
+写操作结束之后需要把原始数组指向新的复制数组。
+
+
 
 # <font face="楷体" id="6"> ArrayList经典Demo</font>
 
