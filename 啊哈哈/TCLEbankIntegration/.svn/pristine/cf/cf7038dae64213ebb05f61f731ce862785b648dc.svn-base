@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Implementation-Title: EncryptionSystem
+Implementation-Version: 1.0.0-SNAPSHOT
+Built-By: xiaofang.chen
+Implementation-Vendor-Id: com.tcl.jr
+Build-Jdk: 1.8.0_25
+Implementation-URL: http://projects.spring.io/spring-boot/EncryptionSy
+ stem/
+Created-By: Maven Integration for Eclipse
+Implementation-Vendor: Pivotal Software, Inc.
+Main-Class: com.tcl.jr.EncryptionSystemApplication
+

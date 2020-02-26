@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:bean="http://webService.tclEbank.ebank.jr.tcl.com/pament/pamentQuery/bean" xmlns:intf="http://webService.tclEbank.ebank.jr.tcl.com/pament/pamentQuery/intf" xmlns:p="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" name="tclEbankServiceForQuery" targetNamespace="http://webService.tclEbank.ebank.jr.tcl.com/pament/pamentQuery/intf">
+	<wsdl:types>
+		<xs:schema xmlns="http://webService.tclEbank.ebank.jr.tcl.com/pament/pamentQuery/bean" xmlns:common="http://webService.tclEbank.ebank.jr.tcl.com/pament/pamentQuery/bean" xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://webService.tclEbank.ebank.jr.tcl.com/pament/pamentQuery/bean">
+			<xs:import namespace="http://ebank.tcl.com/common/bean"/>
+			
+			<xs:element name="HEADER">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="1" minOccurs="0" name="REQ_TIME" type="xs:string"/>
+						<xs:element maxOccurs="1" minOccurs="0" name="REP_TIME" type="xs:string"/>
+						<xs:element maxOccurs="1" minOccurs="0" name="REP_CODE" type="xs:string"/>
+						<xs:element maxOccurs="1" minOccurs="0" name="REP_DESC" type="xs:string"/>
+						<xs:element maxOccurs="1" minOccurs="0" name="REQ_INDEX" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			
+			<xs:element name="REQUEST">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="1" minOccurs="0" name="CMSTRANNO" type="xs:string"/>
+						<xs:element maxOccurs="1" minOccurs="0" name="REQ_TIME" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="RESPONSE">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element maxOccurs="1" minOccurs="0" name="TRANSTAT" type="xs:string"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>	
+			
+		</xs:schema>
+    </wsdl:types>
+	<wsdl:service name="tclEbankServiceForQuery">
+		<wsdl:documentation>服务模板</wsdl:documentation>
+		<wsdl:port binding="intf:tclEbankServiceForQuerySoapBinding" name="tclEbankServiceForQuery">
+			<soap:address location="http://localhost:9090/TCLEbankIntegration/services/tclEbankServiceForQuery"/>
+		</wsdl:port>
+	</wsdl:service>
+	<wsdl:portType name="tclEbankServiceForQuery">
+		<wsdl:operation name="tclEbankServiceForQuery">
+			<wsdl:input message="intf:HEADER" name="TclTransInput"/>
+			<wsdl:output message="intf:RESPONSE" name="TclTransOutput"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="tclEbankServiceForQuerySoapBinding" type="intf:tclEbankServiceForQuery">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="tclEbankServiceForQuery">
+			<soap:operation soapAction="/app/TclTrans" style="document"/>
+			<wsdl:input>
+				<soap:body parts="HEADER" use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body parts="RESPONSE" use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:message name="HEADER">
+		<wsdl:part element="bean:HEADER" name="HEADER"/>
+	</wsdl:message>
+	<wsdl:message name="RESPONSE">
+		<wsdl:part element="bean:RESPONSE" name="RESPONSE"/>
+	</wsdl:message>
+</wsdl:definitions>

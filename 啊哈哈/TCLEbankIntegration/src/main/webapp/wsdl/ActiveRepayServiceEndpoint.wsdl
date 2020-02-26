@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:bean="http://service.ccic.com/app/ActiveRepay/bean" xmlns:intf="http://service.ccic.com/app/ActiveRepay/intf" xmlns:p="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" name="ActiveRepayService" targetNamespace="http://service.ccic.com/app/ActiveRepay/intf">
+	<wsdl:types>
+		<xs:schema xmlns="http://service.ccic.com/common/bean" xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://service.ccic.com/common/bean">
+			<xs:complexType name="RequestHeadDTO">
+				<xs:annotation>
+					<xs:documentation>
+						<name>请求消息头</name>
+					</xs:documentation>
+				</xs:annotation>
+				<xs:sequence>
+					<xs:element minOccurs="0" name="seqNo" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								<name>流水号</name>
+								<description>ESB生成的服务标识号，仅在ESB调用服务提供方时有效，通常为32+4位GUID(xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+								</description>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element minOccurs="0" name="consumerSeqNo" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								<name>消费方流水号</name>
+								<description>服务消费方用于唯一标识一次服务交互，建议使用GUID</description>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="consumerID" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								<name>服务消费方ID</name>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element minOccurs="0" name="providerID" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								<name>服务提供方ID</name>
+								<description>仅当消费方在路由服务中显式指定提供方时使用，ESB不会传给服务提供方
+								</description>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element minOccurs="0" name="classCode" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								<name>险类</name>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element minOccurs="0" name="riskCode" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								<name>险种</name>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element minOccurs="0" name="regionCode" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								<name>地区</name>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element minOccurs="0" name="version" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								<name>服务版本</name>
+								<description>用于同一服务有多个版本时消费方标识用，缺省为空，ESB不会传给服务提供方
+								</description>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="ResponseHeadDTO">
+				<xs:annotation>
+					<xs:documentation>
+						<name>响应消息头</name>
+					</xs:documentation>
+				</xs:annotation>
+				<xs:sequence>
+					<xs:element minOccurs="0" name="seqNo" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								<name>流水号</name>
+								<description>
+									ESB生成的服务标识号，服务提供方不需要返回，ESB在返回给服务消费方时根据请求消息自动填充，通常为32+4位GUID(xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+								</description>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element minOccurs="0" name="consumerSeqNo" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								<name>消费方流水号</name>
+								<description>服务消费方用于唯一标识一次服务交互，ESB在返回给服务消费方时根据请求消息自动填充
+								</description>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element minOccurs="0" name="providerSeqNo" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								<name>提供方流水号</name>
+								<description>服务提供方用于唯一标识一次服务交互，建议使用GUID</description>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="status" type="xs:int">
+						<xs:annotation>
+							<xs:documentation>
+								<name>响应状态</name>
+								<description>0 - 成功, 1 - ESB失败, 2 - 应用失败</description>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element minOccurs="0" name="esbCode" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								<name>ESB响应代码</name>
+								<description>返回ESB失败的描述性代码</description>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element minOccurs="0" name="esbMessage" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								<name>ESB响应信息</name>
+								<description>返回ESB失败的描述性信息</description>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element minOccurs="0" name="appCode" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								<name>应用响应代码</name>
+								<description>返回应用响应的描述性代码</description>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element minOccurs="0" name="appMessage" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+								<name>应用响应信息</name>
+								<description>返回应用响应的描述性信息</description>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+			</xs:complexType>
+		</xs:schema>
+		<xs:schema xmlns="http://service.ccic.com/app/ActiveRepay/bean" xmlns:common="http://service.ccic.com/common/bean" xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://service.ccic.com/app/ActiveRepay/bean">
+			<xs:import namespace="http://service.ccic.com/common/bean"/>
+			
+			
+			<xs:complexType name="ActiveRepayRequestDTO">
+				<xs:annotation>
+					<xs:documentation>
+						<name>请求消息体</name>
+					</xs:documentation>
+				</xs:annotation>
+				<xs:sequence>
+					<xs:element maxOccurs="1" minOccurs="0" name="customerId" type="xs:string"/>
+					<xs:element maxOccurs="1" minOccurs="0" name="applyNo" type="xs:string"/>
+					<xs:element maxOccurs="1" minOccurs="0" name="billNo" type="xs:string"/>
+					<xs:element maxOccurs="1" minOccurs="0" name="repayAmt" type="xs:double"/>
+					<xs:element maxOccurs="1" minOccurs="0" name="capital" type="xs:double"/>
+					<xs:element maxOccurs="1" minOccurs="0" name="interest" type="xs:double"/>
+					<xs:element maxOccurs="1" minOccurs="0" name="overdueAmt" type="xs:double"/>
+					<xs:element maxOccurs="1" minOccurs="0" name="rfine" type="xs:double"/>
+					<xs:element maxOccurs="1" minOccurs="0" name="mfee" type="xs:double"/>
+					<xs:element maxOccurs="1" minOccurs="0" name="dfee" type="xs:double"/>
+					<xs:element maxOccurs="1" minOccurs="0" name="afee" type="xs:double"/>
+					<xs:element maxOccurs="1" minOccurs="0" name="poundage" type="xs:double"/>
+					<xs:element maxOccurs="1" minOccurs="0" name="repayType" type="xs:string"/>
+				</xs:sequence>
+			</xs:complexType>
+			<xs:element name="requestBody" type="ActiveRepayRequestDTO"/>
+			<xs:element name="requestHead" type="common:RequestHeadDTO"/>
+			<xs:element name="responseHead" type="common:ResponseHeadDTO"/>
+
+			<xs:element name="ActiveRepayRequest">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="requestHead"/>
+						<xs:element ref="requestBody"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ActiveRepayResponse">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element ref="responseHead"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>	
+			
+		</xs:schema>
+    </wsdl:types>
+	<wsdl:service name="ActiveRepayService">
+		<wsdl:documentation>服务模板</wsdl:documentation>
+		<wsdl:port binding="intf:ActiveRepayServiceSoapBinding" name="ActiveRepayServiceEndpoint">
+			<soap:address location="http://localhost:9090/TCLEbankIntegration/services/ActiveRepayServiceEndpoint"/>
+		</wsdl:port>
+	</wsdl:service>
+	<wsdl:portType name="ActiveRepayService">
+		<wsdl:operation name="ActiveRepayService">
+			<wsdl:input message="intf:ActiveRepayRequest" name="ActiveRepayInput"/>
+			<wsdl:output message="intf:ActiveRepayResponse" name="ActiveRepayOutput"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="ActiveRepayServiceSoapBinding" type="intf:ActiveRepayService">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="ActiveRepayService">
+			<soap:operation soapAction="/app/ActiveRepay" style="document"/>
+			<wsdl:input>
+				<soap:body parts="ActiveRepayRequest" use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body parts="ActiveRepayResponse" use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:message name="ActiveRepayRequest">
+		<wsdl:part element="bean:ActiveRepayRequest" name="ActiveRepayRequest"/>
+	</wsdl:message>
+	<wsdl:message name="ActiveRepayResponse">
+		<wsdl:part element="bean:ActiveRepayResponse" name="ActiveRepayResponse"/>
+	</wsdl:message>
+</wsdl:definitions>

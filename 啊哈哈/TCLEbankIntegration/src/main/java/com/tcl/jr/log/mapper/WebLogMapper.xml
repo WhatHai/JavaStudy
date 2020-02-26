@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tcl.jr.log.mapper.WebLogMapper">
+  <resultMap id="BaseResultMap" type="com.tcl.jr.log.bean.WebLog">
+    <id column="REQ_INDEX" jdbcType="VARCHAR" property="reqIndex" />
+    <result column="REQ_TIME" jdbcType="VARCHAR" property="reqTime" />
+    <result column="REP_TIME" jdbcType="VARCHAR" property="repTime" />
+    <result column="REP_DESC" jdbcType="VARCHAR" property="repDesc" />
+    <result column="REP_CODE" jdbcType="VARCHAR" property="repCode" />
+    <result column="CMSTRANNO" jdbcType="VARCHAR" property="cmstranno" />
+    <result column="WEB_CODE" jdbcType="VARCHAR" property="webCode" />
+    <result column="WEB_DESC" jdbcType="VARCHAR" property="webDesc" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    REQ_INDEX, REQ_TIME, REP_TIME, REP_DESC, REP_CODE, CMSTRANNO, WEB_CODE, WEB_DESC
+  </sql>
+  <select id="selectByExample" parameterType="com.tcl.jr.log.bean.WebLogExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from WEB_LOG
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from WEB_LOG
+    where REQ_INDEX = #{reqIndex,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from WEB_LOG
+    where REQ_INDEX = #{reqIndex,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.tcl.jr.log.bean.WebLogExample">
+    delete from WEB_LOG
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.tcl.jr.log.bean.WebLog">
+    insert into WEB_LOG (REQ_INDEX, REQ_TIME, REP_TIME, 
+      REP_DESC, REP_CODE, CMSTRANNO, 
+      WEB_CODE, WEB_DESC)
+    values (#{reqIndex,jdbcType=VARCHAR}, #{reqTime,jdbcType=VARCHAR}, #{repTime,jdbcType=VARCHAR}, 
+      #{repDesc,jdbcType=VARCHAR}, #{repCode,jdbcType=VARCHAR}, #{cmstranno,jdbcType=VARCHAR}, 
+      #{webCode,jdbcType=VARCHAR}, #{webDesc,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.tcl.jr.log.bean.WebLog">
+    insert into WEB_LOG
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="reqIndex != null">
+        REQ_INDEX,
+      </if>
+      <if test="reqTime != null">
+        REQ_TIME,
+      </if>
+      <if test="repTime != null">
+        REP_TIME,
+      </if>
+      <if test="repDesc != null">
+        REP_DESC,
+      </if>
+      <if test="repCode != null">
+        REP_CODE,
+      </if>
+      <if test="cmstranno != null">
+        CMSTRANNO,
+      </if>
+      <if test="webCode != null">
+        WEB_CODE,
+      </if>
+      <if test="webDesc != null">
+        WEB_DESC,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="reqIndex != null">
+        #{reqIndex,jdbcType=VARCHAR},
+      </if>
+      <if test="reqTime != null">
+        #{reqTime,jdbcType=VARCHAR},
+      </if>
+      <if test="repTime != null">
+        #{repTime,jdbcType=VARCHAR},
+      </if>
+      <if test="repDesc != null">
+        #{repDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="repCode != null">
+        #{repCode,jdbcType=VARCHAR},
+      </if>
+      <if test="cmstranno != null">
+        #{cmstranno,jdbcType=VARCHAR},
+      </if>
+      <if test="webCode != null">
+        #{webCode,jdbcType=VARCHAR},
+      </if>
+      <if test="webDesc != null">
+        #{webDesc,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.tcl.jr.log.bean.WebLogExample" resultType="java.lang.Long">
+    select count(*) from WEB_LOG
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update WEB_LOG
+    <set>
+      <if test="record.reqIndex != null">
+        REQ_INDEX = #{record.reqIndex,jdbcType=VARCHAR},
+      </if>
+      <if test="record.reqTime != null">
+        REQ_TIME = #{record.reqTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.repTime != null">
+        REP_TIME = #{record.repTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.repDesc != null">
+        REP_DESC = #{record.repDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="record.repCode != null">
+        REP_CODE = #{record.repCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.cmstranno != null">
+        CMSTRANNO = #{record.cmstranno,jdbcType=VARCHAR},
+      </if>
+      <if test="record.webCode != null">
+        WEB_CODE = #{record.webCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.webDesc != null">
+        WEB_DESC = #{record.webDesc,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update WEB_LOG
+    set REQ_INDEX = #{record.reqIndex,jdbcType=VARCHAR},
+      REQ_TIME = #{record.reqTime,jdbcType=VARCHAR},
+      REP_TIME = #{record.repTime,jdbcType=VARCHAR},
+      REP_DESC = #{record.repDesc,jdbcType=VARCHAR},
+      REP_CODE = #{record.repCode,jdbcType=VARCHAR},
+      CMSTRANNO = #{record.cmstranno,jdbcType=VARCHAR},
+      WEB_CODE = #{record.webCode,jdbcType=VARCHAR},
+      WEB_DESC = #{record.webDesc,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tcl.jr.log.bean.WebLog">
+    update WEB_LOG
+    <set>
+      <if test="reqTime != null">
+        REQ_TIME = #{reqTime,jdbcType=VARCHAR},
+      </if>
+      <if test="repTime != null">
+        REP_TIME = #{repTime,jdbcType=VARCHAR},
+      </if>
+      <if test="repDesc != null">
+        REP_DESC = #{repDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="repCode != null">
+        REP_CODE = #{repCode,jdbcType=VARCHAR},
+      </if>
+      <if test="cmstranno != null">
+        CMSTRANNO = #{cmstranno,jdbcType=VARCHAR},
+      </if>
+      <if test="webCode != null">
+        WEB_CODE = #{webCode,jdbcType=VARCHAR},
+      </if>
+      <if test="webDesc != null">
+        WEB_DESC = #{webDesc,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where REQ_INDEX = #{reqIndex,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tcl.jr.log.bean.WebLog">
+    update WEB_LOG
+    set REQ_TIME = #{reqTime,jdbcType=VARCHAR},
+      REP_TIME = #{repTime,jdbcType=VARCHAR},
+      REP_DESC = #{repDesc,jdbcType=VARCHAR},
+      REP_CODE = #{repCode,jdbcType=VARCHAR},
+      CMSTRANNO = #{cmstranno,jdbcType=VARCHAR},
+      WEB_CODE = #{webCode,jdbcType=VARCHAR},
+      WEB_DESC = #{webDesc,jdbcType=VARCHAR}
+    where REQ_INDEX = #{reqIndex,jdbcType=VARCHAR}
+  </update>
+</mapper>

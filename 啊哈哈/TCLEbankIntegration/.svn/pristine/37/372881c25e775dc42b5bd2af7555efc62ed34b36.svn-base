@@ -1,0 +1,97 @@
+<ns1:deployment xmlns="http://xml.apache.org/axis/wsdd/" xmlns:java="http://xml.apache.org/axis/wsdd/providers/java" xmlns:ns1="http://xml.apache.org/axis/wsdd/">
+ <ns1:globalConfiguration>
+  <ns1:parameter name="sendMultiRefs" value="true"/>
+  <ns1:parameter name="disablePrettyXML" value="true"/>
+  <ns1:parameter name="adminPassword" value="admin"/>
+  <ns1:parameter name="attachments.Directory" value="D:\apache-tomcat-7.0.67-Vertu\webapps\TCLEbankIntegration\WEB-INF\attachments"/>
+  <ns1:parameter name="dotNetSoapEncFix" value="true"/>
+  <ns1:parameter name="enableNamespacePrefixOptimization" value="false"/>
+  <ns1:parameter name="sendXMLDeclaration" value="true"/>
+  <ns1:parameter name="attachments.implementation" value="org.apache.axis.attachments.AttachmentsImpl"/>
+  <ns1:parameter name="sendXsiTypes" value="true"/>
+  <ns1:requestFlow>
+   <ns1:handler type="java:org.apache.axis.handlers.JWSHandler">
+    <ns1:parameter name="scope" value="session"/>
+   </ns1:handler>
+   <ns1:handler type="java:org.apache.axis.handlers.JWSHandler">
+    <ns1:parameter name="scope" value="request"/>
+    <ns1:parameter name="extension" value=".jwr"/>
+   </ns1:handler>
+  </ns1:requestFlow>
+ </ns1:globalConfiguration>
+ <ns1:handler name="URLMapper" type="java:org.apache.axis.handlers.http.URLMapper"/>
+ <ns1:handler name="Authenticate" type="java:org.apache.axis.handlers.SimpleAuthenticationHandler"/>
+ <ns1:handler name="LocalResponder" type="java:org.apache.axis.transport.local.LocalResponder"/>
+  <service name="TclTransService" provider="java:RPC" style="document" use="literal">
+     <parameter name="wsdlTargetNamespace" value="http://ebank.tcl.com/app/TclTrans/intf"/>
+     <parameter name="wsdlServiceElement" value="TclTransService"/>
+     <parameter name="schemaQualified" value="http://ebank.tcl.com/app/TclTrans/bean"/>
+     <parameter name="wsdlServicePort" value="TclTransServiceEndpoint"/>
+     <parameter name="className" value="com.tcl.ebank.app.TclTrans.intf.TclTransServiceSoapBindingSkeleton"/>
+     <parameter name="wsdlPortType" value="TclTransService"/>
+     <parameter name="typeMappingVersion" value="1.2"/>
+     <parameter name="allowedMethods" value="*"/>
+   </service>  
+ <ns1:service name="AdminService" provider="java:MSG">
+  <ns1:parameter name="allowedMethods" value="AdminService"/>
+  <ns1:parameter name="enableRemoteAdmin" value="false"/>
+  <ns1:parameter name="className" value="org.apache.axis.utils.Admin"/>
+  <ns1:namespace>http://xml.apache.org/axis/wsdd/</ns1:namespace>
+ </ns1:service>
+ <ns1:service name="Version" provider="java:RPC">
+  <ns1:parameter name="allowedMethods" value="getVersion"/>
+  <ns1:parameter name="className" value="org.apache.axis.Version"/>
+ </ns1:service>
+ <ns1:service name="tclEbankServiceForQuery" provider="java:RPC" style="wrapped" use="literal">
+  <ns1:operation name="PIRESPONSEQUERY" qname="ns3:PIRESPONSEQUERY" returnQName="ns3:PIRESPONSEQUERYReturn" returnType="ns4:PIResponseQuery" soapAction="" xmlns:ns3="http://webService.ebank.jr.tcl.com" xmlns:ns4="http://bean.webService.ebank.jr.tcl.com">
+   <ns1:parameter qname="ns3:REQUEST" type="ns4:PIRequestQuery"/>
+  </ns1:operation>
+  <ns1:parameter name="allowedMethods" value="PIRESPONSEQUERY"/>
+  <ns1:parameter name="wsdlPortType" value="tclEbankServiceForQuery"/>
+  <ns1:parameter name="typeMappingVersion" value="1.2"/>
+  <ns1:parameter name="schemaQualified" value="http://webService.ebank.jr.tcl.com,http://bean.webService.ebank.jr.tcl.com"/>
+  <ns1:parameter name="wsdlServicePort" value="tclEbankServiceForQuery"/>
+  <ns1:parameter name="className" value="com.tcl.jr.ebank.webService.tclEbankServiceForQuery"/>
+  <ns1:parameter name="wsdlTargetNamespace" value="http://webService.ebank.jr.tcl.com"/>
+  <ns1:parameter name="wsdlServiceElement" value="tclEbankServiceForQueryService"/>
+  <ns1:typeMapping deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle="" qname="ns5:QueryHeader" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" type="java:com.tcl.jr.ebank.webService.bean.QueryHeader" xmlns:ns5="http://bean.webService.ebank.jr.tcl.com"/>
+  <ns1:typeMapping deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle="" qname="ns6:PIResponseQuery" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" type="java:com.tcl.jr.ebank.webService.bean.PIResponseQuery" xmlns:ns6="http://bean.webService.ebank.jr.tcl.com"/>
+  <ns1:typeMapping deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle="" qname="ns7:QueryResponse" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" type="java:com.tcl.jr.ebank.webService.bean.QueryResponse" xmlns:ns7="http://bean.webService.ebank.jr.tcl.com"/>
+  <ns1:typeMapping deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle="" qname="ns8:PIRequestQuery" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" type="java:com.tcl.jr.ebank.webService.bean.PIRequestQuery" xmlns:ns8="http://bean.webService.ebank.jr.tcl.com"/>
+ </ns1:service>
+ <ns1:service name="tclEbankService" provider="java:RPC" style="wrapped" use="literal">
+  <ns1:operation name="main" qname="ns9:main" soapAction="" xmlns:ns9="http://webService.ebank.jr.tcl.com">
+   <ns1:parameter qname="ns9:args" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema"/>
+  </ns1:operation>
+  <ns1:operation name="PUSHDATATOWEBSYS" qname="ns10:PUSHDATATOWEBSYS" returnQName="ns10:PUSHDATATOWEBSYSReturn" returnType="ns11:PIResponse" soapAction="" xmlns:ns10="http://webService.ebank.jr.tcl.com" xmlns:ns11="http://bean.webService.ebank.jr.tcl.com">
+   <ns1:parameter qname="ns10:REQUEST" type="ns11:PIRequest"/>
+  </ns1:operation>
+  <ns1:parameter name="allowedMethods" value="PUSHDATATOWEBSYS main"/>
+  <ns1:parameter name="wsdlPortType" value="tclEbankService"/>
+  <ns1:parameter name="typeMappingVersion" value="1.2"/>
+  <ns1:parameter name="schemaQualified" value="http://webService.ebank.jr.tcl.com,http://bean.webService.ebank.jr.tcl.com"/>
+  <ns1:parameter name="wsdlServicePort" value="tclEbankService"/>
+  <ns1:parameter name="className" value="com.tcl.jr.ebank.webService.tclEbankService"/>
+  <ns1:parameter name="wsdlTargetNamespace" value="http://webService.ebank.jr.tcl.com"/>
+  <ns1:parameter name="wsdlServiceElement" value="tclEbankServiceService"/>
+  <ns1:typeMapping deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle="" qname="ns12:PIRequest" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" type="java:com.tcl.jr.ebank.webService.bean.PIRequest" xmlns:ns12="http://bean.webService.ebank.jr.tcl.com"/>
+  <ns1:typeMapping deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle="" qname="ns13:PIResponse" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" type="java:com.tcl.jr.ebank.webService.bean.PIResponse" xmlns:ns13="http://bean.webService.ebank.jr.tcl.com"/>
+ </ns1:service>
+ <ns1:transport name="http">
+  <ns1:requestFlow>
+   <ns1:handler type="URLMapper"/>
+   <ns1:handler type="java:org.apache.axis.handlers.http.HTTPAuthHandler"/>
+  </ns1:requestFlow>
+  <ns1:parameter name="qs:list" value="org.apache.axis.transport.http.QSListHandler"/>
+  <ns1:parameter name="qs:wsdl" value="org.apache.axis.transport.http.QSWSDLHandler"/>
+  <ns1:parameter name="qs.list" value="org.apache.axis.transport.http.QSListHandler"/>
+  <ns1:parameter name="qs.method" value="org.apache.axis.transport.http.QSMethodHandler"/>
+  <ns1:parameter name="qs:method" value="org.apache.axis.transport.http.QSMethodHandler"/>
+  <ns1:parameter name="qs.wsdl" value="org.apache.axis.transport.http.QSWSDLHandler"/>
+ </ns1:transport>
+ <ns1:transport name="local">
+  <ns1:responseFlow>
+   <ns1:handler type="LocalResponder"/>
+  </ns1:responseFlow>
+ </ns1:transport>
+</ns1:deployment>

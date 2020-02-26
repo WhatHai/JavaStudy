@@ -1,0 +1,3 @@
+2018-09-25 15:38:59,332 INFO (StartupInfoLogger.java:50)- Starting EncryptionSystemApplicationTests on ITD-WUYAOP00-D1 with PID 6624 (started by christopher.wu in D:\Workspaces\ALMBranch\tcl)
+2018-09-25 15:38:59,333 INFO (SpringApplication.java:662)- No active profile set, falling back to default profiles: default
+2018-09-25 15:39:00,690 INFO (StartupInfoLogger.java:59)- Started EncryptionSystemApplicationTests in 1.526 seconds (JVM running for 2.501)
