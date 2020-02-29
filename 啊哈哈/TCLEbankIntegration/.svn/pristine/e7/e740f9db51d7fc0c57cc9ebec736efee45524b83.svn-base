@@ -1,9 +1,0 @@
-2018-09-27 15:52:47,275 INFO (StartupInfoLogger.java:50)- Starting EncryptionSystemApplicationTests on ITD-WUYAOP00-D1 with PID 5596 (started by christopher.wu in D:\Workspaces\ALMBranch\tcl)
-2018-09-27 15:52:47,277 INFO (SpringApplication.java:662)- No active profile set, falling back to default profiles: default
-2018-09-27 15:52:48,725 INFO (StartupInfoLogger.java:59)- Started EncryptionSystemApplicationTests in 1.612 seconds (JVM running for 2.8)
-2018-09-27 16:27:28,608 INFO (StartupInfoLogger.java:50)- Starting EncryptionSystemApplicationTests on ITD-WUYAOP00-D1 with PID 8348 (started by christopher.wu in D:\Workspaces\ALMBranch\tcl)
-2018-09-27 16:27:28,609 INFO (SpringApplication.java:662)- No active profile set, falling back to default profiles: default
-2018-09-27 16:27:29,962 INFO (StartupInfoLogger.java:59)- Started EncryptionSystemApplicationTests in 1.499 seconds (JVM running for 2.152)
-2018-09-27 17:02:36,716 INFO (StartupInfoLogger.java:50)- Starting EncryptionSystemApplicationTests on ITD-WUYAOP00-D1 with PID 5032 (started by christopher.wu in D:\Workspaces\ALMBranch\tcl)
-2018-09-27 17:02:36,717 INFO (SpringApplication.java:662)- No active profile set, falling back to default profiles: default
-2018-09-27 17:02:38,023 INFO (StartupInfoLogger.java:59)- Started EncryptionSystemApplicationTests in 1.448 seconds (JVM running for 2.088)

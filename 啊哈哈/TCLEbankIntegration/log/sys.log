@@ -1,6 +1,0 @@
-2018-10-30 14:05:29,681 INFO (StartupInfoLogger.java:48)- Starting DemoApplication on d1-minghai-huan with PID 5264 (E:\Project_code\TCLEbankIntegration\target\classes started by minghai.huang in E:\Project_code\TCLEbankIntegration)
-2018-10-30 14:05:29,687 INFO (SpringApplication.java:593)- No active profile set, falling back to default profiles: default
-2018-10-30 14:34:31,132 INFO (StartupInfoLogger.java:48)- Starting DemoApplication on d1-minghai-huan with PID 23012 (E:\Project_code\TCLEbankIntegration\target\classes started by minghai.huang in E:\Project_code\TCLEbankIntegration)
-2018-10-30 14:34:31,134 INFO (SpringApplication.java:593)- No active profile set, falling back to default profiles: default
-2018-10-30 14:37:11,817 INFO (StartupInfoLogger.java:48)- Starting DemoApplication on d1-minghai-huan with PID 20420 (E:\Project_code\TCLEbankIntegration\target\classes started by minghai.huang in E:\Project_code\TCLEbankIntegration)
-2018-10-30 14:37:11,819 INFO (SpringApplication.java:593)- No active profile set, falling back to default profiles: default

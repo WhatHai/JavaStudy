@@ -1,4 +1,0 @@
-driver=oracle.jdbc.OracleDriver
-jdbc.url=jdbc.url=jdbc:oracle:thin:@10.92.201.48:1521:ESPMW
-jdbc.username=ecm
-jdbc.password=zaq12wsx
