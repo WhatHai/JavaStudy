@@ -1,6 +1,6 @@
 ## 简介
 
-基于JDK实现的可重入锁，是一种递归无阻塞的同步机制。可以等同于synchronized使用，但是更灵活强大，可以减少死锁发生
+基于JDK实现的可重入锁，是一种**递归无阻塞的**同步机制。可以等同于synchronized使用，但是更灵活强大，可以减少死锁发生
 
 也是排他锁，同一时间只能有一个线程在执行ReentrantLock.lock()之后的任务
 
@@ -68,7 +68,7 @@ public ReentrantLock(boolean fair) {
 
 <https://blog.csdn.net/xlgen157387/article/details/78375986>
 
-![img](/images/ReentrantReadWriteLock.png)
+![img](images/ReentrantReadWriteLock.png)
 
 ReentrantReadWriteLock有两个内部类：ReadLock和WriteLock  实现了Lock 接口
 

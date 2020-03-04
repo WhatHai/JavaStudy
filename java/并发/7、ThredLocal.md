@@ -4,17 +4,21 @@
 
 ## ThreadLocal
 
-### ThreadLocal简介
+### 简介
 
-通常情况下，我们创建的变量是可以被任何一个线程访问并修改的。**如果想实现每一个线程都有自己的专属本地变量该如何解决呢？** JDK中提供的`ThreadLocal`类正是为了解决这样的问题。 **`ThreadLocal`类主要解决的就是让每个线程绑定自己的值，可以将`ThreadLocal`类形象的比喻成存放数据的盒子，盒子中可以存储每个线程的私有数据。**
+多线程并发如何保证数据的安全性和一致性的两种主要方法：一种是加锁，另一种是使用ThreadLocal
 
-**如果你创建了一个`ThreadLocal`变量，那么访问这个变量的每个线程都会有这个变量的本地副本，这也是`ThreadLocal`变量名的由来。他们可以使用 `get（）` 和 `set（）` 方法来获取默认值或将其值更改为当前线程所存的副本的值，从而避免了线程安全问题。**
+当使用ThreadLocal维护变量时，每个线程拥有独立的变量副本，改变就不会影响其他线程的副本
 
-再举个简单的例子： 
+**如果你创建了一个`ThreadLocal`变量，那么访问这个变量的每个线程都会有这个变量的本地副本。他们可以使用 `get（）` 和 `set（）` 方法来获取默认值或将其值更改为当前线程所存的副本的值，从而避免了线程安全问题。**
 
-比如有两个人去宝屋收集宝物，这两个共用一个袋子的话肯定会产生争执，但是给他们两个人每个人分配一个袋子的话就不会出现这样的问题。如果把这两个人比作线程的话，那么ThreadLocal就是用来这两个线程竞争的。
+**比较：**
 
-### ThreadLocal示例
+通过对象锁机制，保证同一时间只有一个线程访问变量。这时该变量是多个线程共享的
+
+ThreadLocal是线程局部变量，为每一个线程提供一个独立的变量副本，从而隔离了多个线程对数据的访问冲突
+
+### 示例
 
 相信看了上面的解释，大家已经搞懂 ThreadLocal 类是个什么东西了。
 
@@ -51,7 +55,6 @@ public class ThreadLocalExample implements Runnable{
     }
 
 }
-
 ```
 
 Output:
@@ -93,7 +96,7 @@ Thread Name= 9 formatter = yy-M-d ah:mm
     };
 ```
 
-### ThreadLocal原理
+### 原理
 
 从 `Thread`类源代码入手。
 
@@ -131,6 +134,14 @@ ThreadLocal.ThreadLocalMap inheritableThreadLocals = null;
 
 **每个Thread中都具备一个ThreadLocalMap，而ThreadLocalMap可以存储以ThreadLocal为key的键值对。** 比如我们在同一个线程中声明了两个 `ThreadLocal` 对象的话，会使用 `Thread`内部都是使用仅有那个`ThreadLocalMap` 存放数据的，`ThreadLocalMap`的 key 就是 `ThreadLocal`对象，value 就是 `ThreadLocal` 对象调用`set`方法设置的值。`ThreadLocal` 是 map结构是为了让每个线程可以关联多个 `ThreadLocal`变量。这也就解释了ThreadLocal声明的变量为什么在每一个线程都有自己的专属本地变量。
 
+#### Thread、ThreadLocal、ThreadLocalMap、Entry之间的关系：
+
+ThreadLocalMap 是ThreadLocal 内部类，ThreadLocal依赖于Thread去执行
+
+每个Thread 维护一个 ThreadLocalMap 映射表，这个映射表的 key 是 ThreadLocal实例本身，value 是真正需要存储的 Object，一个Thread可以依附有多个ThreadLocal对象
+
+ThreadLocal 本身并不存储值，它只是作为一个 key 来让线程从 ThreadLocalMap 获取 value。（一个Thread可以依附有多个ThreadLocal对象）
+
 ```java
 public class Thread implements Runnable {
  ......
@@ -149,7 +160,9 @@ ThreadLocal.ThreadLocalMap inheritableThreadLocals = null;
 
 ### ThreadLocal 内存泄露问题
 
-`ThreadLocalMap` 中使用的 key 为 `ThreadLocal` 的弱引用,而 value 是强引用。所以，如果 `ThreadLocal` 没有被外部强引用的情况下，在垃圾回收的时候会 key 会被清理掉，而 value 不会被清理掉。这样一来，`ThreadLocalMap` 中就会出现key为null的Entry。假如我们不做任何措施的话，value 永远无法被GC 回收，这个时候就可能会产生内存泄露。ThreadLocalMap实现中已经考虑了这种情况，在调用 `set()`、`get()`、`remove()` 方法的时候，会清理掉 key 为 null 的记录。使用完 `ThreadLocal`方法后 最好手动调用`remove()`方法
+`ThreadLocalMap` 中使用的 key 为 `ThreadLocal` 的弱引用,而 value 是强引用。所以，如果 `ThreadLocal` 没有被外部强引用的情况下，在垃圾回收的时候会 key 会被清理掉，而 value 不会被清理掉。这样一来，`ThreadLocalMap` 中就会出现key为null的Entry。
+
+假如我们不做任何措施的话，value 永远无法被GC 回收，这个时候就可能会产生内存泄露。ThreadLocalMap实现中已经考虑了这种情况，在调用 `set()`、`get()`、`remove()` 方法的时候，会清理掉 key 为 null 的记录。使用完 `ThreadLocal`方法后 最好手动调用`remove()`方法
 
 ```java
       static class Entry extends WeakReference<ThreadLocal<?>> {
@@ -168,3 +181,36 @@ ThreadLocal.ThreadLocalMap inheritableThreadLocals = null;
 > 如果一个对象只具有弱引用，那就类似于**可有可无的生活用品**。弱引用与软引用的区别在于：只具有弱引用的对象拥有更短暂的生命周期。在垃圾回收器线程扫描它 所管辖的内存区域的过程中，一旦发现了只具有弱引用的对象，不管当前内存空间足够与否，都会回收它的内存。不过，由于垃圾回收器是一个优先级很低的线程， 因此不一定会很快发现那些只具有弱引用的对象。
 >
 > 弱引用可以和一个引用队列（ReferenceQueue）联合使用，如果弱引用所引用的对象被垃圾回收，Java虚拟机就会把这个弱引用加入到与之关联的引用队列中。
+
+
+
+#### JDK如何处理
+
+在一些封装的方法中对key=null的value擦除操作
+
+比如：get()方法，调用了ThreadLocalMap 的 getEntry()
+
+key为null， 则会调用getEntryAfterMiss()方法，在这个方法中，如果k == null ， 则调用expungeStaleEntry(i);方法。
+
+expungeStaleEntry(i)方法完成了对key=null 的key所对应的value进行赋空， 释放了空间避免内存泄漏。
+
+同时它遍历下一个key为空的entry， 并将value赋值为null， 等待下次GC释放掉其空间
+
+
+
+#### 开发中如何释放ThreadLocal遗留存储
+
+包装其父类remove方法为静态方法，如果是spring项目， 可以借助于bean的声明周期， 在拦截器的afterCompletion阶段进行调用
+
+#### Spring如何处理Bean多线程下的并发问题
+
+ThreadLocal维护相同变量，每个线程有独立副本，spring也确实是用了ThreadLocal来处理多线程下相同变量并发的线程安全问题
+
+#### spring 如何保证数据库事务在同一个连接下执行
+
+事务必须是在同一个连接对象中操作， 多个连接下事务就会不可控， 需要借助分布式事务完成
+
+DataSourceTransactionManager 是spring的数据源事务管理器， 它会在你调用getConnection()的时候从数据库连接池中获取一个connection， 然后将其与ThreadLocal绑定， 事务完成后解除绑定。这样就保证了事务在同一连接下完成
+
+
+
