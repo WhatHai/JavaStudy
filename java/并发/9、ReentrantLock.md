@@ -4,7 +4,17 @@
 
 也是排他锁，同一时间只能有一个线程在执行ReentrantLock.lock()之后的任务
 
-使用的是AQS中的一个同步状态state表示当前共享资源是否被其他线程锁占用。如果为0则表示未被占用，其他值表示该锁被重入的次数
+使用的是**AQS**中的一个同步状态state表示当前共享资源是否被其他线程锁占用。如果为0则表示未被占用，其他值表示该锁被重入的次数
+
+**AQS实现ReentrantLock非公平锁**
+
+![](images/reentrantLock非公平锁.png)
+
+**AQS实现ReentrantLock公平锁**
+
+![](images/reentrantLock公平锁.png)
+
+
 
 ## 获取锁
 

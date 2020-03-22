@@ -1,8 +1,6 @@
 ## LinkedHashMap
 
-### 
-
-### 存储结构
+ 存储结构
 
 继承自 HashMap，因此具有和 HashMap 一样的快速查找特性。
 

@@ -3,46 +3,187 @@
 - [史上最全Redis高可用技术解决方案大全](https://mp.weixin.qq.com/s?__biz=Mzg2OTA0Njk0OA==&mid=2247484850&idx=1&sn=3238360bfa8105cf758dcf7354af2814&chksm=cea24a79f9d5c36fb2399aafa91d7fb2699b5006d8d037fe8aaf2e5577ff20ae322868b04a87&token=1082669959&lang=zh_CN&scene=21#wechat_redirect)
 - [Raft协议实战之Redis Sentinel的选举Leader源码解析](http://weizijun.cn/2015/04/30/Raft%E5%8D%8F%E8%AE%AE%E5%AE%9E%E6%88%98%E4%B9%8BRedis%20Sentinel%E7%9A%84%E9%80%89%E4%B8%BELeader%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/)
 
-
-
 ## 集群
 
-### 主从复制
+问题：公司用的哪种redis集群？
 
-#### 主从链(拓扑结构)
+### 主从架构
+
+单机的 redis，能够承载的 QPS 大概就在上万到几万不等
+
+一主多从或多主多从，主负责写，并且将数据复制到其它的 slave 节点，从节点负责读。所有的**读请求全部走从节点**。这样也可以很轻松实现水平扩容，**支撑读高并发**
+
+####主从复制机制
+
+- redis 采用**异步方式**复制数据到 slave 节点，不过 redis2.8 开始，slave node 会周期性地确认自己每次复制的数据量；
+- 一个主节点是可以配置多个从节点的；
+- 从节点也可以连接其他的 从节点；
+- 从节点 做复制的时候，不会 阻塞主节点的正常工作；
+- 从节点 在做复制的时候，也不会 阻塞 对自己的查询操作，它会用旧的数据集来提供服务；但是复制完成的时候，需要删除旧数据集，加载新数据集，这个时候就会暂停对外服务了；
+- 从节点主要用来进行横向扩容，做读写分离，扩容的 从节点可以提高读的吞吐量。
+
+**注意**，如果采用了主从架构，那么建议必须**开启** **主节点的持久化**，不建议用 slave node 作为 master node 的数据热备，因为那样的话，如果你关掉 master 的持久化，可能在 master 宕机重启的时候数据是空的，然后可能一经过复制， slave node 的数据也丢了。
+
+另外，master 的各种**备份方案**，也需要做。万一本地的所有文件丢失了，从备份中挑选一份 rdb 去恢复 master，这样才能**确保启动的时候，是有数据的**，即使采用了后续讲解的[高可用机制](https://github.com/doocs/advanced-java/blob/master/docs/high-concurrency/redis-sentinel.md)，slave node 可以自动接管 master node，但也可能 sentinel 还没检测到 master failure，master node 就自动重启了，还是可能导致上面所有的 slave node 数据被清空。
 
 
-
-![主从](https://user-images.githubusercontent.com/26766909/67539461-d1a26c00-f714-11e9-81ae-61fa89faf156.png)
-
-![主从](https://user-images.githubusercontent.com/26766909/67539485-e0891e80-f714-11e9-8980-d253239fcd8b.png)
 
 #### 复制模式
 
-- 全量复制：Master 全部同步到 Slave
-- 部分复制：Slave 数据丢失进行备份
+##### 全量复制
+
+- master 执行 bgsave ，在本地生成一份 rdb 快照文件。
+- master node 将 rdb 快照文件发送给 slave node，如果 rdb 复制时间超过 60秒（repl-timeout），那么 slave node 就会认为复制失败，可以适当调大这个参数(对于千兆网卡的机器，一般每秒传输 100MB，6G 文件，很可能超过 60s)
+- master node 在生成 rdb 时，会将所有**新的写命令**缓存在内存中，在 slave node 保存了 rdb 之后，再将新的写命令复制给 slave node。
+- 如果在复制期间，内存缓冲区持续消耗超过 64MB，或者一次性超过 256MB，那么停止复制，复制失败。
+
+```
+client-output-buffer-limit slave 256MB 64MB 60
+```
+
+- slave node 接收到 rdb 之后，清空自己的旧数据，然后重新加载 rdb 到自己的内存中，同时**基于旧的数据版本**对外提供服务。
+- 如果 slave node 开启了 AOF，那么会立即执行 BGREWRITEAOF，重写 AOF。
+
+##### 增量复制
+
+- 如果全量复制过程中，master-slave 网络连接断掉，那么 slave 重新连接 master 时，会触发增量复制。
+- master 直接从自己的 backlog 中获取部分丢失的数据，发送给 slave node，默认 backlog 就是 1MB。
+- master 就是根据 slave 发送的 psync 中的 offset 来从 backlog 中获取数据的。
+
+
+
+
+
+#### redis 主从复制的核心原理
+
+当启动一个 slave node 的时候，它会发送一个 `PSYNC` 命令给 master node。
+
+如果这是 slave node 初次连接到 master node，那么会触发一次 `full resynchronization` **全量复制**。此时 master 会启动一个后台进程，开始生成一份 `RDB` 快照文件，同时还会将从客户端 client 新收到的所有**写命令缓存在内存中**。`RDB` 文件生成完毕后， master 会将这个 `RDB` 发送给 slave，slave 会先**写入本地磁盘，然后再从本地磁盘加载到内存**中，接着 master 会将内存中缓存的写命令发送到 slave，slave 也会同步这些数据。slave node 如果跟 master node 有网络故障，断开了连接，会自动重连，连接之后 master node 仅会复制给 slave 部分缺少的数据。
+
+
+
+#### 复制的完整流程
+
+slave node 启动时，会在自己本地保存 master node 的信息，包括 master node 的`host`和`ip`，但是复制流程没开始。
+
+slave node 内部有个**定时任务**，每秒检查是否有新的 master node 要连接和复制，如果发现，就跟 master node 建立 **socket** 网络连接。然后 slave node 发送 `ping` 命令给 master node。如果 master 设置了 requirepass，那么 slave node 必须发送 masterauth 的口令过去进行认证。master node **第一次执行全量复制**，将所有数据发给 slave node。而在后续，master node 持续将写命令，异步复制给 slave node。
+
+
+
+#### 主从复制的断点续传
+
+从 redis2.8 开始，就支持主从复制的断点续传，如果主从复制过程中，网络连接断掉了，那么可以接着上次复制的地方，继续复制下去，而不是从头开始复制一份。
+
+master node 会在内存中维护一个 backlog，master 和 slave 都会保存一个 replica offset 还有一个 master run id，offset 就是保存在 backlog 中的。如果 master 和 slave 网络连接断掉了，slave 会让 master 从上次 replica offset 开始继续复制，如果没有找到对应的 offset，那么就会执行一次 `resynchronization`。
+
+
+
+#### 无磁盘化复制
+
+master 在内存中直接创建 `RDB`，然后发送给 slave，不会在自己本地落地磁盘了。只需要在配置文件中开启 `repl-diskless-sync yes` 即可。
+
+```
+repl-diskless-sync yes
+
+# 等待 5s 后再开始复制，因为要等更多 slave 重新连接过来
+repl-diskless-sync-delay 5
+```
+
+
+
+#### redis 如何才能做到高可用
+
+主备切换，用哨兵模式
+
+
 
 #### 问题点
 
-- 同步故障
-  - 复制数据延迟(不一致)
-  - 读取过期数据(Slave 不能删除数据)
-  - 从节点故障
-  - 主节点故障
-- 配置不一致
-  - maxmemory 不一致:丢失数据
-  - 优化参数不一致:内存不一致.
-- 避免全量复制
-  - 选择小主节点(分片)、低峰期间操作.
-  - 如果节点运行 id 不匹配(如主节点重启、运行 id 发送变化)，此时要执行全量复制，应该配合哨兵和集群解决.
-  - 主从复制挤压缓冲区不足产生的问题(网络中断，部分复制无法满足)，可增大复制缓冲区( rel_backlog_size 参数).
-- 复制风暴
+同步故障
+- 复制数据延迟(不一致)
+- 读取过期数据(Slave 不能删除数据)
+- 从节点故障
+- 主节点故障，无法自动切换
+
+配置不一致
+- maxmemory 不一致:丢失数据
+- 优化参数不一致:内存不一致.
+
+避免全量复制
+- 选择小主节点(分片)、低峰期间操作.
+- 如果节点运行 id 不匹配(如主节点重启、运行 id 发送变化)，此时要执行全量复制，应该配合哨兵和集群解决.
+- 主从复制挤压缓冲区不足产生的问题(网络中断，部分复制无法满足)，可增大复制缓冲区( rel_backlog_size 参数).
+
+复制风暴
+
+
+
+
 
 ### 哨兵机制
 
-#### 拓扑图
+![哨兵机制-拓扑图](images/哨兵机制.png)
 
-![哨兵机制-拓扑图](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-11/哨兵机制-拓扑图.png)
+中小公司为何多用哨兵？
+
+优点：
+
+缺点：故障转移期间，redis不可用
+
+####哨兵介绍：
+
+主要功能：
+
+- 集群监控：负责监控 redis master 和 slave 进程是否正常工作。
+- 消息通知：如果某个 redis 实例有故障，那么哨兵负责发送消息作为报警通知给管理员。
+- 故障转移：如果 master node 挂掉了，会自动转移到 slave node 上。
+- 配置中心：如果故障转移发生了，通知 client 客户端新的 master 地址。
+
+哨兵集群：
+
+- 故障转移时，判断一个 master node 是否宕机了，需要大部分的哨兵都同意才行，涉及到了**分布式选举**的问题。
+- 即使部分哨兵节点挂掉了，哨兵集群还是能正常工作的，因为如果一个作为高可用机制重要组成部分的故障转移系统本身是单点的，那就很坑爹了。
+
+
+
+#### redis 哨兵主备切换的数据丢失问题
+
+主备切换的过程，可能会导致数据丢失：
+
+- 异步复制导致的数据丢失
+
+因为 master->slave 的复制是异步的，所以可能有部分数据还没复制到 slave，master 就宕机了，此时这部分数据就丢失了。
+
+- 脑裂导致的数据丢失
+
+脑裂，也就是说，某个 master 所在机器突然**脱离了正常的网络**，跟其他 slave 机器不能连接，但是实际上 master 还运行着。此时哨兵可能就会**认为** master 宕机了，然后开启选举，将其他 slave 切换成了 master。这个时候，集群里就会有两个 master ，也就是所谓的**脑裂**。
+
+此时虽然某个 slave 被切换成了 master，但是可能 client 还没来得及切换到新的 master，还继续向旧 master 写数据。因此旧 master 再次恢复的时候，会被作为一个 slave 挂到新的 master 上去，自己的数据会清空，重新从新的 master 复制数据。而新的 master 并没有后来 client 写入的数据，因此，这部分数据也就丢失了。
+
+
+
+#### 数据丢失问题的解决方案
+
+进行如下配置：
+
+```
+min-slaves-to-write 1
+min-slaves-max-lag 10
+```
+
+表示，要求至少有 1 个 slave，数据复制和同步的延迟不能超过 10 秒。
+
+如果说一旦所有的 slave，数据复制和同步的延迟都超过了 10 秒钟，那么这个时候，master 就不会再接收任何请求了。
+
+- 减少异步复制数据的丢失
+
+有了 `min-slaves-max-lag` 这个配置，就可以确保说，一旦 slave 复制数据和 ack 延时太长，就认为可能 master 宕机后损失的数据太多了，那么就拒绝写请求，这样可以把 master 宕机时由于部分数据未同步到 slave 导致的数据丢失降低的可控范围内。
+
+- 减少脑裂的数据丢失
+
+如果一个 master 出现了脑裂，跟其他 slave 丢了连接，那么上面两个配置可以确保说，如果不能继续给指定数量的 slave 发送数据，而且 slave 超过 10 秒没有给自己 ack 消息，那么就直接拒绝客户端的写请求。因此在脑裂场景下，最多就丢失 10 秒的数据。
+
+
 
 #### 节点下线
 
@@ -53,6 +194,31 @@
   - 所有 Sentinel 节点对 Redis 节点失败要达成共识，即超过 quorum 个统一。
   - 当节点被一个 Sentinel 节点记为主观下线时，并不意味着该节点肯定故障了，还需要 Sentinel 集群的其他 Sentinel 节点共同判断为主观下线才行。
   - 该 Sentinel 节点会询问其它 Sentinel 节点，如果 Sentinel 集群中超过 quorum 数量的 Sentinel 节点认为该 Redis 节点主观下线，则该 Redis 客观下线。
+
+
+
+#### slave->master 选举算法
+
+如果一个 master 被认为 odown 了，而且 majority 数量的哨兵都允许主备切换，那么某个哨兵就会执行主备切换操作，此时首先要选举一个 slave 来，会考虑 slave 的一些信息：
+
+- 跟 master 断开连接的时长
+- slave 优先级
+- 复制 offset
+- run id
+
+如果一个 slave 跟 master 断开连接的时间已经超过了 `down-after-milliseconds` 的 10 倍，外加 master 宕机的时长，那么 slave 就被认为不适合选举为 master。
+
+```
+(down-after-milliseconds * 10) + milliseconds_since_master_is_in_SDOWN_state
+```
+
+接下来会对 slave 进行排序：
+
+- 按照 slave 优先级进行排序，slave priority 越低，优先级就越高。
+- 如果 slave priority 相同，那么看 replica offset，哪个 slave 复制了越多的数据，offset 越靠后，优先级就越高。
+- 如果上面两个条件都相同，那么选择一个 run id 比较小的那个 slave。
+
+
 
 #### Leader选举
 
@@ -85,11 +251,13 @@
 - 每 2s 每个 Sentinel 通过 Master 的 Channel 交换信息(pub - sub)。
 - 每 10s 每个 Sentinel 对 Master 和 Slave 执行 info，目的是发现 Slave 节点、确定主从关系。
 
+
+
 ### 分布式集群(Cluster)
 
-#### 拓扑图
+![image](images/分布式集群Cluster.jpg)
 
-![image](https://user-images.githubusercontent.com/26766909/67539510-f8f93900-f714-11e9-9d8d-08afdecff95a.png)
+功能类似哨兵，没有哨兵节点
 
 #### 通讯
 
@@ -130,6 +298,8 @@
 - CRC16(key)%16384
 - ![image](https://user-images.githubusercontent.com/26766909/67539610-3fe72e80-f715-11e9-8e0d-ea58bc965795.png)
 
+
+
 ## 使用场景
 
 ### 热点数据
@@ -142,6 +312,9 @@
 ### 会话维持 Session
 
 会话维持 Session 场景，即使用 Redis 作为分布式场景下的登录中心存储应用。每次不同的服务在登录的时候，都会去统一的 Redis 去验证 Session 是否正确。但是在微服务场景，一般会考虑 Redis + JWT 做 Oauth2 模块。
+
+spring session + redis 实现session共享
+
 >其中 Redis 存储 JWT 的相关信息主要是留出口子，方便以后做统一的防刷接口，或者做登录设备限制等。
 
 ### 分布式锁 SETNX
@@ -151,25 +324,94 @@
 1. 超时时间设置：获取锁的同时，启动守护线程，使用 expire 进行定时更新超时时间。如果该业务机器宕机，守护线程也挂掉，这样也会自动过期。如果该业务不是宕机，而是真的需要这么久的操作时间，那么增加超时时间在业务上也是可以接受的，但是肯定有个最大的阈值。
 2. 但是为了增加高可用，需要使用多台 Redis，就增加了复杂性，就可以参考 Redlock：[Redlock分布式锁](Redlock分布式锁.md#怎么在单节点上实现分布式锁)
 
+
+
+####基于 Redis 分布式锁 
+
+1、获取锁的时候，使用 setnx(SETNX key val:当且仅当 key 不存在时，set 一个 key 为 val 的字符串，返回 1;若 key 存在，则什么都不做，返回 0)加锁，锁的 value 值为一个随机生成的 UUID，在释放锁的时候进行判断。并使用 expire 命令为锁添 加一个超时时间，超过该时间则自动释放锁。 
+
+2、获取锁的时候调用 setnx，如果返回 0，则该锁正在被别人使用，返回 1 则成功获取 锁。 还设置一个获取的超时时间，若超过这个时间则放弃获取锁。 
+
+3、释放锁的时候，通过 UUID 判断是不是该锁，若是该锁，则执行 delete 进行锁释放。 
+
+
+
+### 对象缓存
+
+mset user：1：name zhuge user：1：blance：188
+
+mget user：1：name user：1：blance
+
 ### 表缓存
 
 Redis 缓存表的场景有黑名单、禁言表等。访问频率较高，即读高。根据业务需求，可以使用后台定时任务定时刷新 Redis 的缓存表数据。
 
 ### 消息队列 list
 
-主要使用了 List 数据结构。  
+主要使用了 List 数据结构。lpush+brpop，（brpop阻塞等待消费消息）  
 List 支持在头部和尾部操作，因此可以实现简单的消息队列。
+
 1. 发消息：在 List 尾部塞入数据。
 2. 消费消息：在 List 头部拿出数据。
 
 同时可以使用多个 List，来实现多个队列，根据不同的业务消息，塞入不同的 List，来增加吞吐量。
 
+### 微博公众号信息流
+
+用list实现，关注者发消息，存储到消息队列，key为发布者id，value为消息id，lpush msg:发布者id 10080
+
+获取消息，用lrange，key为发布者id，指定获取区间。lrange msg:发布者id 0 5
+
+### 点赞收藏
+
+用set集合，sadd key value；srem key value；sismember key value；smembers key；scard key
+
+点赞：sadd like:[消息id] {用户id}
+
+取消点赞：srem like:[消息id] {用户id}
+
+检查用户是否点过咱：sismembers like:[消息id] {用户id}
+
+获取点赞用户列表：smembers like:[消息id] 
+
+获取点赞用户数：scard like:[消息id]
+
+### 抽奖
+
+用set数据结构实现
+
+参与抽奖用户加入集合：sadd key [userid]
+
+查看所有用户：smembers key
+
+抽奖：srandmember key [count]；或者抽完后从集合删除：spop key [count]
+
+
+
 ### 计数器 string
+
+比如文章的阅读量
 
 主要使用了 INCR、DECR、INCRBY、DECRBY 方法。
 
 INCR key：给 key 的 value 值增加一 
 DECR key：给 key 的 value 值减去一
+
+### 购物车
+
+用户id为key；商品id为field；商品数量为value
+
+操作：添加商品 --> hset cart:1001 10080 1
+
+​	增加商品 --> hincby cart:1001 10080 1
+
+商品总数 --> hlen cart:1001
+
+删除商品 --> hdel cart:1001 10080
+
+获取所有商品 --> hgetall cart:1001
+
+
 
 ## 缓存设计
 
@@ -200,7 +442,7 @@ DECR key：给 key 的 value 值减去一
 
 ### 缓存穿透
 
-> 当大量的请求无命中缓存、直接请求到后端数据库(业务代码的 bug、或恶意攻击)，同时后端数据库也没有查询到相应的记录、无法添加缓存。  
+> 当大量的请求无命中缓存、直接请求到后端数据库(业务代码的 bug、或恶意攻击)，同时**后端数据库也没有查询到**相应的记录、无法添加缓存。  
 > 这种状态会一直维持，流量一直打到存储层上，无法利用缓存、还会给存储层带来巨大压力。
 
 #### 解决方案

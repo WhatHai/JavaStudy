@@ -9,11 +9,11 @@
 
 ### 堆参数
 
-![img](https://ask.qcloudimg.com/http-save/yehe-1130324/975rk4d0wx.jpeg?imageView2/2/w/1620)
+![img](/Users/hayder/Documents/JavaStudy/java/jvm/images/堆参数.png)
 
 ### 回收器参数
 
-![img](https://ask.qcloudimg.com/http-save/yehe-1130324/34nzellt71.jpeg?imageView2/2/w/1620)
+![img](images/回收器参数.png)
 
 如上表所示，目前**主要有串行、并行和并发三种**，对于大内存的应用而言，串行的性能太低，因此使用到的主要是并行和并发两种。并行和并发 GC 的策略通过 `UseParallelGC `和` UseConcMarkSweepGC` 来指定，还有一些细节的配置参数用来配置策略的执行方式。例如：`XX:ParallelGCThreads`， `XX:CMSInitiatingOccupancyFraction` 等。 通常：Young 区对象回收只可选择并行（耗时间），Old 区选择并发（耗 CPU）。
 
@@ -21,17 +21,11 @@
 
 > 备注：在Java8中永久代的参数`-XX:PermSize` 和`-XX：MaxPermSize`已经失效。
 
-![img](https://ask.qcloudimg.com/http-save/yehe-1130324/urw285pczz.jpeg?imageView2/2/w/1620)
-
 ### 常用组合
 
-![img](https://ask.qcloudimg.com/http-save/yehe-1130324/ff8ues5crb.jpeg?imageView2/2/w/1620)
+![img](images/常用组合.png)
 
 ## 常用 GC 调优策略
-
-1. GC 调优原则；
-2. GC 调优目的；
-3. GC 调优策略；
 
 ### GC 调优原则
 

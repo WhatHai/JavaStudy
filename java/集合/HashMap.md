@@ -6,7 +6,7 @@ Map接口下的集合以键值对方式存在的双列集合，key不能相同�
 
 HashMap 主要用来存放键值对，它基于哈希表的Map接口实现
 
-JDK1.8 之前 HashMap 由 数组+链表 组成的，数组是 HashMap 的主体，链表则是主要为了解决哈希冲突而存在的（“拉链法”解决冲突）.JDK1.8 以后在解决哈希冲突时有了较大的变化，当链表长度大于**阈值**（默认为 8）时，将链表转化为红黑树（将链表转换成红黑树前会判断，如果当前**数组的长度小于 64**，那么会选择先进行数组扩容，而不是转换为红黑树），以减少搜索时间，具体可以参考 `treeifyBin`方法。
+JDK1.8 之前 HashMap 由 数组+链表 组成的，数组是 HashMap 的主体，链表则是主要为了解决哈希冲突而存在的（“拉链法”解决冲突）.JDK1.8 以后在解决哈希冲突时有了较大的变化，当链表长度大于**阈值**（默认为 8）时，将链表转化为红黑树（将链表转换成红黑树前会判断，如果当前**数组的长度小于 64**，那么会选择先进行**数组扩容**，而不是转换为红黑树），以减少搜索时间，具体可以参考 `treeifyBin`方法。
 
 ## 底层数据结构分析
 ### JDK1.8之前
@@ -55,7 +55,18 @@ https://zhuanlan.zhihu.com/p/21673805
 
 ![JDK1.8之后的HashMap底层数据结构](https://pic1.zhimg.com/80/8db4a3bdfb238da1a1c4431d2b6e075c_hd.png)
 
+
+
+####1、Node节点
+
+Node是HashMap的一个内部类，实现了Map.Entry接口，本质是就是一个映射(键值对)。上图中的每个黑色圆点就是一个Node对象。
+
+
+
+
+
 **类的属性：**
+
 ```java
 public class HashMap<K,V> extends AbstractMap<K,V> implements Map<K,V>, Cloneable, Serializable {
     // 序列号
@@ -226,9 +237,44 @@ final void putMapEntries(Map<? extends K, ? extends V> m, boolean evict) {
 ### put方法
 HashMap只提供了put用于添加元素，putVal方法只是给put方法调用的一个方法，并没有提供给用户使用。
 
-HashMap 允许插入键为 null 的键值对。但是因为无法调用 null 的 hashCode() 方法，也就无法确定该键值对的桶下标，只能通过强制指定一个桶下标来存放。**HashMap 使用第 0 个桶存放键为 null 的键值对**
+HashMap 允许插入键为 null 的键值对。但是因为**无法调用 null 的 hashCode()** 方法，也就无法确定该键值对的桶下标，只能通过强制指定一个桶下标来存放。**HashMap 使用第 0 个桶存放键为 null 的键值对**
 
-使用链表的**头插法**，也就是新的键值对插在链表的头部，而不是链表的尾部
+HashMap初始数组大小16，加载因子0.75，数据达到容量*0.75就要扩容
+
+1.7用数组+链表，扩容用头插法，可能造成环形引用，死循环
+
+1.8用数组+链表+红黑树结构，当链表长度大于8 ，会判断总容量如果小于64先扩容，大于则链表转红黑树
+
+当红黑树元素小于6，转换回链表
+
+多线程put，可能出现数据被覆盖
+
+~~使用链表的**头插法**，也就是新的键值对插在链表的头部，而不是链表的尾部~~
+
+#### 1.8 put方法
+
+![](images/hashmap1.8put.png)
+
+①.判断键值对数组table[i]是否为空或为null，否则执行resize()进行扩容；
+
+②.根据键值key计算hash值得到插入的数组索引i，如果table[i]==null，直接新建节点添加，转向⑥，如果table[i]不为空，转向③；
+
+③.判断table[i]的首个元素是否和key一样，如果相同直接覆盖value，否则转向④，这里的相同指的是hashCode以及equals；
+
+④.判断table[i] 是否为treeNode，即table[i] 是否是红黑树，如果是红黑树，则直接在树中插入键值对，否则转向⑤；
+
+⑤.遍历table[i]，判断链表长度是否大于8，大于8的话把链表转换为红黑树，在红黑树中执行插入操作，否则进行链表的插入操作；遍历过程中若发现key已经存在直接覆盖value即可；
+
+⑥.插入成功后，判断实际存在的键值对数量size是否超多了最大容量threshold，如果超过，进行扩容。
+
+
+
+```java
+public V put(K key, V value) {
+ 2     // 对key的hashCode()做hash
+ 3     return putVal(hash(key), key, value, false, true);
+ 4 }
+```
 
 **对putVal方法添加元素的分析如下：**
 
@@ -311,7 +357,15 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 } 
 ```
 
-**我们再来对比一下 JDK1.7 put方法的代码**
+
+
+##### 转红黑树操作
+
+当链表长度大于8，判断容量是否大于64，否则扩容
+
+
+
+#### JDK1.7 put方法的代码
 
 **对于put方法的分析如下：**
 
@@ -365,9 +419,9 @@ public final int hashCode() {
 }
 ```
 
-#### 取模
+#### 与运算
 
-将 key 的 hash 值对桶个数取模：**hash%capacity**，如果能保证 capacity 为 **2 的 n 次方**，那么就可以将这个操作转换为位运算。
+如果能保证 capacity 为 **2 的 n 次方**，那么就可以将这个操作转换为位运算。
 
 ```java
 static int indexFor(int h, int length) {

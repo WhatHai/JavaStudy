@@ -202,6 +202,28 @@ expungeStaleEntry(i)方法完成了对key=null 的key所对应的value进行赋�
 
 包装其父类remove方法为静态方法，如果是spring项目， 可以借助于bean的声明周期， 在拦截器的afterCompletion阶段进行调用
 
+
+
+#### 手动释放ThreadLocal遗留存储?你怎么去设计/实现
+
+这里主要是强化一下手动remove的思想和必要性，设计思想与连接池类似。
+
+包装其父类remove方法为静态方法，如果是spring项目， 可以借助于bean的声明周期， 在拦截器的afterCompletion阶段进行调用。
+
+####弱引用导致内存泄漏，那为什么key不设置为强引用
+
+这个问题就比较有深度了，是你谈薪的小小资本。
+
+如果key设置为强引用， 当threadLocal实例释放后， threadLocal=null， 但是threadLocal会有强引用指向threadLocalMap，threadLocalMap.Entry又强引用threadLocal， 这样会导致threadLocal不能正常被GC回收。
+
+弱引用虽然会引起内存泄漏， 但是也有set、get、remove方法操作对null key进行擦除的补救措施， 方案上略胜一筹。
+
+线程执行结束后会不会自动清空Entry的value
+
+一并考察了你的gc基础。
+
+事实上，当currentThread执行结束后， threadLocalMap变得不可达从而被回收，Entry等也就都被回收了，但这个环境就要求不对Thread进行复用，但是我们项目中经常会复用线程来提高性能， 所以currentThread一般不会处于终止状态。
+
 #### Spring如何处理Bean多线程下的并发问题
 
 ThreadLocal维护相同变量，每个线程有独立副本，spring也确实是用了ThreadLocal来处理多线程下相同变量并发的线程安全问题

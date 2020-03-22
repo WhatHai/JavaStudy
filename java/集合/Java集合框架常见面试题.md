@@ -1,36 +1,3 @@
-<!-- TOC -->
-
-- [剖析面试最常见问题之Java集合框架](#剖析面试最常见问题之java集合框架)
-    - [说说List,Set,Map三者的区别？](#说说listsetmap三者的区别)
-    - [Arraylist 与 LinkedList 区别?](#arraylist-与-linkedlist-区别)
-        - [补充内容:RandomAccess接口](#补充内容randomaccess接口)
-        - [补充内容:双向链表和双向循环链表](#补充内容双向链表和双向循环链表)
-    - [ArrayList 与 Vector 区别呢?为什么要用Arraylist取代Vector呢？](#arraylist-与-vector-区别呢为什么要用arraylist取代vector呢)
-    - [说一说 ArrayList 的扩容机制吧](#说一说-arraylist-的扩容机制吧)
-    - [HashMap 和 Hashtable 的区别](#hashmap-和-hashtable-的区别)
-    - [HashMap 和 HashSet区别](#hashmap-和-hashset区别)
-    - [HashSet如何检查重复](#hashset如何检查重复)
-    - [HashMap的底层实现](#hashmap的底层实现)
-        - [JDK1.8之前](#jdk18之前)
-        - [JDK1.8之后](#jdk18之后)
-    - [HashMap 的长度为什么是2的幂次方](#hashmap-的长度为什么是2的幂次方)
-    - [HashMap 多线程操作导致死循环问题](#hashmap-多线程操作导致死循环问题)
-    - [ConcurrentHashMap 和 Hashtable 的区别](#concurrenthashmap-和-hashtable-的区别)
-    - [ConcurrentHashMap线程安全的具体实现方式/底层具体实现](#concurrenthashmap线程安全的具体实现方式底层具体实现)
-        - [JDK1.7（上面有示意图）](#jdk17上面有示意图)
-        - [JDK1.8 （上面有示意图）](#jdk18-上面有示意图)
-    - [comparable 和 Comparator的区别](#comparable-和-comparator的区别)
-        - [Comparator定制排序](#comparator定制排序)
-        - [重写compareTo方法实现按年龄来排序](#重写compareto方法实现按年龄来排序)
-    - [集合框架底层数据结构总结](#集合框架底层数据结构总结)
-        - [Collection](#collection)
-            - [1. List](#1-list)
-            - [2. Set](#2-set)
-        - [Map](#map)
-    - [如何选用集合?](#如何选用集合)
-
-<!-- /TOC -->
-
 # 剖析面试最常见问题之Java集合框架
 
 ## 说说List,Set,Map三者的区别？
@@ -45,7 +12,7 @@
 
 - **2. 底层数据结构：** `Arraylist` 底层使用的是 **`Object` 数组**；`LinkedList` 底层使用的是 **双向链表** 数据结构（JDK1.6之前为循环链表，JDK1.7取消了循环。注意双向链表和双向循环链表的区别，下面有介绍到！）
 
-- **3. 插入和删除是否受元素位置的影响：** ① **`ArrayList` 采用数组存储，所以插入和删除元素的时间复杂度受元素位置的影响。** 比如：执行`add(E e) `方法的时候， `ArrayList` 会默认在将指定的元素追加到此列表的末尾，这种情况时间复杂度就是O(1)。但是如果要在指定位置 i 插入和删除元素的话（`add(int index, E element) `）时间复杂度就为 O(n-i)。因为在进行上述操作的时候集合中第 i 和第 i 个元素之后的(n-i)个元素都要执行向后位/向前移一位的操作。 ② **`LinkedList` 采用链表存储，所以对于`add(E e)`方法的插入，删除元素时间复杂度不受元素位置的影响，近似 O（1），如果是要在指定位置`i`插入和删除元素的话（`(add(int index, E element)`） 时间复杂度近似为`o(n))`因为需要先移动到指定位置再插入。**
+- **3. 插入和删除是否受元素位置的影响：** ① **`ArrayList` 采用数组存储，所以插入和删除元素的时间复杂度受元素位置的影响。** 比如：执行`add(E e) `方法的时候， `ArrayList` 会默认在将指定的元素追加到此列表的末尾，这种情况时间复杂度就是O(1)。但是如果要在指定位置 i 插入和删除元素的话（`add(int index, E element) `）时间复杂度就为 O(n-i)。因为在进行上述操作的时候集合中第 i 和第 i 个元素之后的(n-i)个元素都要执行向后位/向前**移一位的操作**。 ② **`LinkedList` 采用链表存储，所以对于`add(E e)`方法的插入，删除元素时间复杂度不受元素位置的影响，近似 O（1），如果是要在指定位置`i`插入和删除元素的话（`(add(int index, E element)`） 时间复杂度近似为`o(n))`因为需要先移动到指定位置再插入。**
 
 - **4. 是否支持快速随机访问：** `LinkedList` 不支持高效的随机元素访问，而 `ArrayList` 支持。快速随机访问就是通过元素的序号快速获取元素对象(对应于`get(int index) `方法)。
 
@@ -102,10 +69,17 @@ public interface RandomAccess {
 ## HashMap 和 Hashtable 的区别
 
 1. **线程是否安全：** HashMap 是非线程安全的，HashTable 是线程安全的；HashTable 内部的方法基本都经过`synchronized` 修饰。（如果你要保证线程安全的话就使用 ConcurrentHashMap 吧！）；
+
 2. **效率：** 因为线程安全的问题，HashMap 要比 HashTable 效率高一点。另外，HashTable 基本被淘汰，不要在代码中使用它；
+
 3. **对Null key 和Null value的支持：** HashMap 中，null 可以作为键，这样的键只有一个，可以有一个或多个键所对应的值为 null。。但是在 HashTable 中 put 进的键值只要有一个 null，直接抛出 NullPointerException。
+
 4. **初始容量大小和每次扩充容量大小的不同 ：** ①创建时如果不指定容量初始值，Hashtable 默认的初始大小为11，之后每次扩充，容量变为原来的2n+1。HashMap 默认的初始化大小为16。之后每次扩充，容量变为原来的2倍。②创建时如果给定了容量初始值，那么 Hashtable 会直接使用你给定的大小，而 HashMap 会将其扩充为2的幂次方大小（HashMap 中的`tableSizeFor()`方法保证，下面给出了源代码）。也就是说 HashMap 总是使用2的幂作为哈希表的大小,后面会介绍到为什么是2的幂次方。
+
 5. **底层数据结构：** JDK1.8 以后的 HashMap 在解决哈希冲突时有了较大的变化，当链表长度大于阈值（默认为8）时，将链表转化为红黑树，以减少搜索时间。Hashtable 没有这样的机制。
+
+6. HashMap继承AbstractMap，Hashtable继承**Dictionary**，都实现了Map接口
+
 
 **HashMap 中带有初始容量的构造函数：**
 
@@ -226,13 +200,17 @@ static int hash(int h) {
 
 - 《Java 8系列之重新认识HashMap》 ：<https://zhuanlan.zhihu.com/p/21673805>
 
+## HashMap 头插法隐患
+
+https://blog.csdn.net/thqtzq/article/details/90485663
+
+
+
 ## HashMap 的长度为什么是2的幂次方
 
-为了能让 HashMap 存取高效，尽量较少碰撞，也就是要尽量把数据分配均匀。我们上面也讲到了过了，Hash 值的范围值-2147483648到2147483647，前后加起来大概40亿的映射空间，只要哈希函数映射得比较均匀松散，一般应用是很难出现碰撞的。但问题是一个40亿长度的数组，内存是放不下的。所以这个散列值是不能直接拿来用的。用之前还要先做对数组的长度取模运算，得到的余数才能用来要存放的位置也就是对应的数组下标。这个数组下标的计算方法是“ `(n - 1) & hash`”。（n代表数组长度）。这也就解释了 HashMap 的长度为什么是2的幂次方。
+为了能让 HashMap 存取高效，尽量较少碰撞，也就是要尽量把数据分配均匀。我们上面也讲到了过了，Hash 值的范围值-2147483648到2147483647，前后加起来大概40亿的映射空间，只要哈希函数映射得比较均匀松散，一般应用是很难出现碰撞的。但问题是一个40亿长度的数组，内存是放不下的。所以这个散列值是不能直接拿来用的。用之前还要先做对数组的长度与运算，得到对应的数组下标。这个数组下标的计算方法是**“ `(n - 1) & hash`”**（n代表数组长度）
 
-**这个算法应该如何设计呢？**
-
-我们首先可能会想到采用%取余的操作来实现。但是，重点来了：**“取余(%)操作中如果除数是2的幂次则等价于与其除数减一的与(&)操作（也就是说 hash%length==hash&(length-1)的前提是 length 是2的 n 次方；）。”** 并且 **采用二进制位操作 &，相对于%能够提高运算效率，这就解释了 HashMap 的长度为什么是2的幂次方。**
+为了与运算结果碰撞减少，n为2的幂次方，因为，**二进制运算后，n-1 二进制末尾为1**，跟哈希值与运算后，末尾可能为0或1
 
 ## HashMap 多线程操作导致死循环问题
 
@@ -443,12 +421,4 @@ Output：
 
 主要根据集合的特点来选用，比如我们需要根据键值获取到元素值时就选用Map接口下的集合，需要排序时选择TreeMap,不需要排序时就选择HashMap,需要保证线程安全就选用ConcurrentHashMap.当我们只需要存放元素值时，就选择实现Collection接口的集合，需要保证元素唯一时选择实现Set接口的集合比如TreeSet或HashSet，不需要就选择实现List接口的比如ArrayList或LinkedList，然后再根据实现这些接口的集合的特点来选用。
 
-## 公众号
 
-如果大家想要实时关注我更新的文章以及分享的干货的话，可以关注我的公众号。
-
-**《Java面试突击》:** 由本文档衍生的专为面试而生的《Java面试突击》V2.0 PDF 版本[公众号](#公众号)后台回复 **"Java面试突击"** 即可免费领取！
-
-**Java工程师必备学习资源:** 一些Java工程师常用学习资源公众号后台回复关键字 **“1”** 即可免费无套路获取。
-
-![我的公众号](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-6/167598cd2e17b8ec.png)
