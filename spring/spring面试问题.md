@@ -28,6 +28,130 @@ Spring 官网列出的 Spring 的 6 个特征:
 - **Spring Web** : 为创建Web应用程序提供支持。
 - **Spring Test** : 提供了对 JUnit 和 TestNG 测试的支持。
 
+
+
+## beanFactory和ApplicationContext区别
+
+ApplicationContext由BeanFactory派生而来，提供货了更多面向实际应用的功能,比如国际化的文本消息
+
+BeanFactory中很多功能以编程实现，ApplicationContext以配置实现
+
+BeanFactory调用getBean()才实例化bean；ApplicationContext在容器启动时，一次性创建了所有的Bean
+
+
+
+ApplicationContext的三个实现
+
+- ClassPathXmlApplicationContext:  ：从classpath 的xml配置文件读取上下文
+- FileSystemXmlApplicationContext ：系统中xml文件读取上下文
+- XmlWebApplicationContext   ：web应用的xml文件读取上下文
+- AnnotationConfigApplicationContext ： 用于提取注解
+
+## 注解配置spring
+
+将bean的描述转移到组件类
+
+配置文件中开启注解
+
+```
+beans>
+   <context:annotation-config/>
+```
+
+@Component：配置bean让spring管理
+
+​	@Component("accountService")：声明server
+
+​	@Component("accountDao") 声明DAO == 
+
+@Controller: 一般用于表现层的注解。 
+
+@Service: 一般用于业务层的注解。
+
+@Repository: 一般用于持久层的注解。
+
+
+
+注入：
+
+​	@Autowired ：按类型自动装配
+
+​	@Qualifier：按名称，当一个类型有过个bean时，spring按类型装配不能识别，可以用@Qualifer注解指定bean的ID
+
+
+
+@Configuration：用于指定当前类是一个 spring 配置类，使用配置类需要用 AnnotationApplicationContext 类来获取容器
+
+@ComponentScan：用于指定 spring 在初始化容器时要扫描的包
+
+@Bean：作用于方法，该方法创建的对象注入spring容器
+
+@Import：用于导入其他配置类
+
+
+
+##           构造注入和设值注入的区别
+
+构造注入必须传入正确参数；如果是基本类型，设值注入没有注入的话会有默认值，构造注入会报错
+
+设值注入不会覆盖构造方法的值
+
+设值注入不能保证依赖是否已注册，依赖关系可能不完整；构造注入则不允许依赖不完整的对象
+
+
+
+
+
+## 用java方式配置spring
+
+@Configuration 声明java类为bean定义的资源类
+
+@Bean 修饰的方法，将类声明为spring的bean  
+
+@ComponentScan 实现组件扫描
+
+
+
+
+
+
+
+ ## Spring Bean 注入  Java.util.Properties?
+
+使用props标签注入
+
+
+
+## 开启基于注解的自动装配
+
+两种方式开启 AutowiredAnnotationBeanPostProcessor 
+
+```
+<beans>
+    <context:annotation-config />
+<beans>
+```
+
+```
+<beans>
+    <bean
+class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
+```
+
+
+
+## spring事件
+
+  如果 bean 实现了 ApplicationListener 接口；当一个ApplicationEvent 发布以后 ，bean 会收到通知
+
+五个标准事件：ApplicationContext上下文更新，开始，停止，关闭事件；请求处理事件（当一个request请求结束触发）。      
+
+自定义事件：继承ApplicationEvent；创建自定义监听器ApplicationListene；publishEvent()方法发布事件
+
+
+
+
+
 ## 3. @RestController vs @Controller
 
 **`Controller` 返回一个页面**
@@ -125,12 +249,24 @@ Aspect(切面 ):
 
 如果我们的切面比较少，那么两者性能差异不大。但是，当切面太多的话，最好选择 AspectJ ，它比Spring AOP 快很多。
 
+### 4.3依赖注入
+
+把类注册成spring容器的bean，需要依赖的时候直接调用，将依赖关系交给spring管理
+
+构造函数注入：用constructor 标签
+
+set方法注入：提供set方法，使用property标签
+
+spring中注入java集合：list、map、set标签
+
+
+
 ## 5. Spring bean
 
 ### 5.1 Spring 中的 bean 的作用域有哪些?
 
-- singleton : 唯一 bean 实例，Spring 中的 bean 默认都是单例的。
-- prototype : 每次请求都会创建一个新的 bean 实例。
+- singleton : 每个容器只有一个 bean 实例，由beanFactory维护，Spring 中的 bean 默认都是单例的。
+- prototype : 每次getbean（）请求都会创建一个新的 bean 实例。
 
 web容器下作用域：
 
@@ -222,51 +358,27 @@ public OneService getService(status) {
 
 ![Spring Bean 生命周期](images/bean生命周期.jpg)
 
-## 6. Spring MVC
 
-### 6.1 说说自己对于 Spring MVC 了解?
 
-谈到这个问题，我们不得不提提之前 Model1 和 Model2 这两个没有 Spring MVC 的时代。
 
-- **Model1 时代** : 很多学 Java 后端比较晚的朋友可能并没有接触过  Model1 模式下的 JavaWeb 应用开发。在 Model1 模式下，整个 Web 应用几乎全部用 JSP 页面组成，只用少量的 JavaBean 来处理数据库连接、访问等操作。这个模式下 JSP 即是控制层又是表现层。显而易见，这种模式存在很多问题。比如①将控制逻辑和表现逻辑混杂在一起，导致代码重用率极低；②前端和后端相互依赖，难以进行测试并且开发效率极低；
-- **Model2 时代** ：学过 Servlet 并做过相关 Demo 的朋友应该了解“Java Bean(Model)+ JSP（View,）+Servlet（Controller）  ”这种开发模式,这就是早期的 JavaWeb MVC 开发模式。Model:系统涉及的数据，也就是 dao 和 bean。View：展示模型中的数据，只是用来展示。Controller：处理用户请求都发送给 ，返回数据给 JSP 并展示给用户。
 
-Model2 模式下还存在很多问题，Model2的抽象和封装程度还远远不够，使用Model2进行开发时不可避免地会重复造轮子，这就大大降低了程序的可维护性和复用性。于是很多JavaWeb开发相关的 MVC 框架应运而生比如Struts2，但是 Struts2 比较笨重。随着 Spring 轻量级开发框架的流行，Spring 生态圈出现了 Spring MVC 框架， Spring MVC 是当前最优秀的 MVC 框架。相比于 Struts2 ， Spring MVC 使用更加简单和方便，开发效率更高，并且 Spring MVC 运行速度更快。
+###Spring 内部 beans?
 
-MVC 是一种设计模式,Spring MVC 是一款很优秀的 MVC 框架。Spring MVC 可以帮助我们进行更简洁的Web层的开发，并且它天生与 Spring 框架集成。Spring MVC 下我们一般把后端项目分为 Service层（处理业务）、Dao层（数据库操作）、Entity层（实体类）、Controller层(控制层，返回数据给前台页面)。
+当一个类引用了另一个类作为成员变量，就可以用内部beans
 
-**Spring MVC 的简单原理图如下：**
+内部bean可以使用属性注入和构造方法注入。
 
-![](http://my-blog-to-use.oss-cn-beijing.aliyuncs.com/18-10-11/60679444.jpg)
+```
+<bean id="CustomerBean" class="com.somnus.common.Customer">
+    <property name="person">
+        <!-- This is inner bean -->
+        <bean class="com.howtodoinjava.common.Person">
+            <property name="name" value="lokesh" />
+            <property name="address" value="India" />
+            <property name="age" value="34" />
+```
 
-### 6.2 SpringMVC 工作原理了解吗?
 
-**原理如下图所示：**
-![SpringMVC运行原理](http://my-blog-to-use.oss-cn-beijing.aliyuncs.com/18-10-11/49790288.jpg)
-
-上图的一个笔误的小问题：Spring MVC 的入口函数也就是前端控制器 `DispatcherServlet` 的作用是接收请求，响应结果。
-
-**流程说明（重要）：**
-
-1. 客户端（浏览器）发送请求，直接请求到 `DispatcherServlet`。
-2. `DispatcherServlet` 根据请求信息调用 `HandlerMapping`，解析请求对应的 `Handler`。
-3. 解析到对应的 `Handler`（也就是我们平常说的 `Controller` 控制器）后，开始由 `HandlerAdapter` 适配器处理。
-4. `HandlerAdapter` 会根据 `Handler `来调用真正的处理器开处理请求，并处理相应的业务逻辑。
-5. 处理器处理完业务后，会返回一个 `ModelAndView` 对象，`Model` 是返回的数据对象，`View` 是个逻辑上的 `View`。
-6. `ViewResolver` 会根据逻辑 `View` 查找实际的 `View`。
-7. `DispaterServlet` 把返回的 `Model` 传给 `View`（视图渲染）。
-8. 把 `View` 返回给请求者（浏览器）
-
-### 拦截器、过滤器和监听器
-
-过滤器是 servlet 规范中的一部分，任何 java web 工程都可以使用。
-拦截器是 SpringMVC 框架自己的，只有使用了 SpringMVC 框架的工程才能用。
-过滤器在 url-pattern 中配置了/*之后，可以对所有要访问的资源拦截。 
-
-拦截器它是只会拦截访问的控制器方法，如果访问的是 jsp，html,css,image 或者 js 是不会进行拦
-截的。
-
-监听器：依赖web容器，随容器启动而启动，只初始化一次
 
 
 
@@ -377,21 +489,6 @@ String transient4; // not persistent because of @Transient
 
 
 
-## @Component 和 @Bean 的区别
-
-1. 作用对象不同: `@Component` 注解作用于类，而`@Bean`注解作用于方法。
-2. `@Component`通常是通过类路径扫描来自动侦测以及自动装配到Spring容器中（我们可以使用 `@ComponentScan` 注解定义要扫描的路径从中找出标识了需要装配的类自动装配到 Spring 的 bean 容器中）。`@Bean` 注解通常是我们在标有该注解的方法中定义产生这个 bean,`@Bean`告诉了Spring这是某个类的示例，当我需要用它的时候还给我。
-3. `@Bean` 注解比 `Component` 注解的自定义性更强，而且很多地方我们只能通过 `@Bean` 注解来注册bean。比如当我们引用第三方库中的类需要装配到 `Spring`容器时，则只能通过 `@Bean`来实现。
-
-## 类声明为Spring的 bean 的注解有哪些
-
-我们一般使用 `@Autowired` 注解自动装配 bean，要想把类标识成可用于 `@Autowired`注解自动装配的 bean 的类,采用以下注解可实现：
-
-- `@Component` ：通用的注解，可标注任意类为 `Spring` 组件。如果一个Bean不知道属于拿个层，可以使用`@Component` 注解标注。
-- `@Repository` : 对应持久层即 Dao 层，主要用于数据库相关操作。
-- `@Service` : 对应服务层，主要涉及一些复杂的逻辑，需要用到 Dao层。
-- `@Controller` : 对应 Spring MVC 控制层，主要用户接受用户请求并调用 Service 层返回数据给前端页面。
-
 ## 非持久化字段
 
 @Transient 注解
@@ -400,6 +497,180 @@ String transient4; // not persistent because of @Transient
 @Transient
 String transient4; //
 ```
+
+
+
+## 6. Spring MVC
+
+### 1 说说自己对于 Spring MVC 了解?
+
+谈到这个问题，我们不得不提提之前 Model1 和 Model2 这两个没有 Spring MVC 的时代。
+
+- **Model1 时代** : 很多学 Java 后端比较晚的朋友可能并没有接触过  Model1 模式下的 JavaWeb 应用开发。在 Model1 模式下，整个 Web 应用几乎全部用 JSP 页面组成，只用少量的 JavaBean 来处理数据库连接、访问等操作。这个模式下 JSP 即是控制层又是表现层。显而易见，这种模式存在很多问题。比如①将控制逻辑和表现逻辑混杂在一起，导致代码重用率极低；②前端和后端相互依赖，难以进行测试并且开发效率极低；
+- **Model2 时代** ：学过 Servlet 并做过相关 Demo 的朋友应该了解“Java Bean(Model)+ JSP（View,）+Servlet（Controller）  ”这种开发模式,这就是早期的 JavaWeb MVC 开发模式。Model:系统涉及的数据，也就是 dao 和 bean。View：展示模型中的数据，只是用来展示。Controller：处理用户请求都发送给 ，返回数据给 JSP 并展示给用户。
+
+Model2 模式下还存在很多问题，Model2的抽象和封装程度还远远不够，使用Model2进行开发时不可避免地会重复造轮子，这就大大降低了程序的可维护性和复用性。于是很多JavaWeb开发相关的 MVC 框架应运而生比如Struts2，但是 Struts2 比较笨重。随着 Spring 轻量级开发框架的流行，Spring 生态圈出现了 Spring MVC 框架， Spring MVC 是当前最优秀的 MVC 框架。相比于 Struts2 ， Spring MVC 使用更加简单和方便，开发效率更高，并且 Spring MVC 运行速度更快。
+
+MVC 是一种设计模式,Spring MVC 是一款很优秀的 MVC 框架。Spring MVC 可以帮助我们进行更简洁的Web层的开发，并且它天生与 Spring 框架集成。Spring MVC 下我们一般把后端项目分为 Service层（处理业务）、Dao层（数据库操作）、Entity层（实体类）、Controller层(控制层，返回数据给前台页面)。
+
+**Spring MVC 的简单原理图如下：**
+
+![](http://my-blog-to-use.oss-cn-beijing.aliyuncs.com/18-10-11/60679444.jpg)
+
+### 2 SpringMVC 工作原理了解吗?
+
+**原理如下图所示：**
+![SpringMVC运行原理](http://my-blog-to-use.oss-cn-beijing.aliyuncs.com/18-10-11/49790288.jpg)
+
+上图的一个笔误的小问题：Spring MVC 的入口函数也就是前端控制器 `DispatcherServlet` 的作用是接收请求，响应结果。
+
+**流程说明（重要）：**
+
+1. 客户端（浏览器）发送请求，直接请求到 `DispatcherServlet`。
+2. `DispatcherServlet` 根据请求信息调用 `HandlerMapping`，解析请求对应的 `Handler`。
+3. 解析到对应的 `Handler`（也就是我们平常说的 `Controller` 控制器）后，开始由 `HandlerAdapter` 适配器处理。
+4. `HandlerAdapter` 会根据 `Handler `来调用真正的处理器开处理请求，并处理相应的业务逻辑。
+5. 处理器处理完业务后，会返回一个 `ModelAndView` 对象，`Model` 是返回的数据对象，`View` 是个逻辑上的 `View`。
+6. `ViewResolver` 会根据逻辑 `View` 查找实际的 `View`。
+7. `DispaterServlet` 把返回的 `Model` 传给 `View`（视图渲染）。
+8. 把 `View` 返回给请求者（浏览器）
+
+### 3 拦截器、过滤器和监听器
+
+####1 拦截器：
+
+​	springMVC中拦截器用于对处理器预处理和后处理，是AOP的具体应用
+
+​	自定义拦截器，实现HandlerInterceptor接口，然后在配置文件中配置，<mvc:interceptor 标签配置mapping和拦截器bean
+
+​	多个拦截器执行顺序：
+
+​		按配置顺序执行，第一个放行才会执行第二个的preHandle（）方法；不放行就直接响应浏览器
+
+​		如果第二个不放行，就执行第一个拦截器的afterCompletion（）方法，然后响应浏览器
+
+​		如果都响应，执行完controller方法后，拦截链从后往前执行postHandler（）方法
+
+​		postHandler 方法执行完，再从后往前执行afterCompletion方法
+
+![springMVC拦截器执行流程](images/springMVC拦截器执行流程.png)
+
+**应用：**
+
+​	用户是否登录，跳转登录页
+
+​	request.getRequestDispatcher("/WEB-INF/jsp/login.jsp").forward(request,response）；
+
+
+
+区别：
+
+- 过滤器是 servlet 规范中的一部分，任何 java web 工程都可以使用。
+- 拦截器是 SpringMVC 框架自己的，只有使用了 SpringMVC 框架的工程才能用。
+- 过滤器在 url-pattern 中配置了/*之后，可以对所有要访问的资源拦截。 
+- 拦截器它是只会拦截访问的控制器方法，如果访问的是 jsp，html,css,image 或者 js 是不会进行拦
+  截的。
+
+
+
+监听器：依赖web容器，随容器启动而启动，只初始化一次
+
+
+
+### 4 post乱码
+
+web.xml添加characterEncodingFilter过滤器
+
+设置过滤器的值，init-param中指定encoding编码
+
+然后启动过滤器forceEncoding为true
+
+
+
+### 5 SpringMvc 控制器
+
+控制器的单例模式，多线程访问有线程安全问题，解决：controller里面不要写字段，只有映射方法
+
+没有字段，方法间如何共享数据？ @SessionAttributes注解
+
+控制器用@Controller注解标识
+
+请求映射用@RequestMapping作用到方法上，写上RequestMethod的值可以指定get、post拦截方式
+
+如果要得到request或session，只需要在方法形参中声明
+
+### 6 方法返回值
+
+可以返回ModelAndView，String
+
+转发和重定向：在返回值前面添加forword或redirect
+
+返回“success” 就是默认请求转发。也可写成 return "forward:/WEB-INF/pages/success.jsp"
+
+
+
+### 7 ajax返回对象：json数据
+
+加上@ResponseBody注解，将controller返回的对象转换成json，响应给客户端
+
+### 8 常用注解
+
+@RequestParam 
+
+​	把请求的参数赋值给指定名称的形参，@RequestParam("name")String username
+
+@RequestBody 
+
+​	用于获取请求体内容，key-value字符串形式
+
+@PathVariable 
+
+​	绑定url中占位符，比如"/usePathVariable/{id}"，绑定id占位符：@PathVariable("id")
+
+@CookieValue 
+
+​	用于绑定cookie的值到形参，`(@CookieValue(value="JSESSIONID",required=false)
+String cookieValue){`
+
+
+
+@ModelAttribute：
+
+​	修饰方法，会在控制器的方法之前先执行。方法有无返回值都可以
+
+​	修饰参数上，获取指定的数据给参数赋值。
+
+
+
+@SessionAttributes
+
+​	用于控制器的多个方法之间参数共享。value:用于指定存入的属性名称；type:用于指定存入的数据类型。
+
+
+
+
+
+### 9 如何让浏览器支持put，delete请求
+
+由于浏览器 form 表单只支持 GET 与 POST 请求
+
+首先在web.xnl配置 HiddentHttpMethodFilter 过滤器
+
+其次表单用post请求，表单里添加 _method 字段，值为put，delete等
+
+最后过滤器会读取 _method  的值，映射到对应方法
+
+
+
+### 10 springMVC异常
+
+ dao、service、controller层出现的异常会向上抛出，最后由前端控制器交给异常处理器处理
+
+首先自定义异常类，继承Exception
+
+其次自定义异常处理器，实现HandlerExceptionResolver接口，重写异常处理方法
+
+最后配置异常处理器，bean标签或者@Bean注解，配置到spring容器
 
 
 
