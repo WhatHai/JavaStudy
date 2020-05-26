@@ -38,9 +38,9 @@ Redis相比Memcached来说，拥有更多的数据结构和并支持更丰富的
 ## 4.2 Redis的线程模型
 ![](https://img-blog.csdnimg.cn/20190511180551350.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzMzNTg5NTEw,size_16,color_FFFFFF,t_70)
 ### 4.2.1 文件事件处理器
-redis基于reactor模式开发了网络事件处理器，这个处理器叫做文件事件处理器，file event handler
+redis基于reactor模式开发了==网络事件处理器==，这个处理器叫做文件事件处理器，file event handler
 
-这个文件事件处理器，是单线程的，redis才叫做单线程的模型，采用IO多路复用机制同时监听多个socket，根据socket上的事件来选择对应的事件处理器来处理这个事件。
+这个文件事件处理器，是==单线程的==，redis才叫做单线程的模型，采用==IO多路复用机制==同时监听多个socket，根据socket上的事件来选择对应的==事件处理器==来处理这个事件。
 
 如果被监听的socket准备好执行`accept`、`read`、`write`、`close`等操作时，跟操作对应的文件事件就会产生，这个时候文件事件处理器就会调用之前关联好的事件处理器来处理对应事件。
 
@@ -52,7 +52,7 @@ redis基于reactor模式开发了网络事件处理器，这个处理器叫做�
 - 文件事件分派器
 - 事件处理器（命令请求处理器、命令回复处理器、连接应答处理器，等等）
 
-多个socket可能并发的产生不同的操作，每个操作对应不同的文件事件，但是IO多路复用程序会监听多个socket，但是会将socket放入一个队列中排队，每次从队列中取出一个socket给事件分派器，事件分派器把socket给对应的事件处理器。
+多个socket可能并发的产生不同的操作，每个操作对应不同的文件事件，但是IO多路复用程序会监听多个socket，但是会将socket放入一个==队列中排队==，每次从队列中取出一个socket给事件分派器，事件分派器把socket给对应的事件处理器。
 
 然后一个socket的事件处理完之后，IO多路复用程序才会将队列中的下一个socket给事件分派器。文件事件分派器会根据每个socket当前产生的事件，来选择对应的事件处理器来处理。
 

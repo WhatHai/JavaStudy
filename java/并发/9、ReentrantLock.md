@@ -1,6 +1,8 @@
 ## 简介
 
-基于JDK实现的可重入锁，是一种**递归无阻塞的**同步机制。可以等同于synchronized使用，但是更灵活强大，可以减少死锁发生
+==基于JDK==实现的可重入锁，==可以实现公平锁==，是一种==**递归无阻塞的**==同步机制。可以等同于synchronized使用，但是更灵活强大，可以减少死锁发生
+
+原理是利用了AQS原理
 
 也是排他锁，同一时间只能有一个线程在执行ReentrantLock.lock()之后的任务
 
@@ -52,7 +54,7 @@ public ReentrantLock(boolean fair) {
 
 - 1、reentrantLock多了时间锁等候，可中断锁等候，锁投票
 
-- 2、reentrantLock提供Condition，对线程等待、唤醒更灵活，更适合在多个条件变量和高度竞争锁的地方，一个 ReentrantLock 可以同时绑定多个 Condition 对象
+- 2、reentrantLock提供Condition，对线程等待、唤醒更灵活，更适合在多个条件变量和高度竞争锁的地方，一个 ReentrantLock 可以同时==绑定多个 Condition 对象==
 
 - 3、reentrantLock提供轮询的锁请求，尝试获取锁，如果成功则继续，否则等到下次运行处理
 
@@ -80,9 +82,9 @@ public ReentrantLock(boolean fair) {
 
 ![img](images/ReentrantReadWriteLock.png)
 
-ReentrantReadWriteLock有两个内部类：ReadLock和WriteLock  实现了Lock 接口
+ReentrantReadWriteLock有两个内部类：==ReadLock和WriteLock==  实现了Lock 接口
 
-读写锁维护一对锁，读锁和写锁，写锁是独占锁，读锁是共享锁，通过读写分离提高性能
+==读写锁维护一对锁==，读锁和写锁，写锁是独占锁，读锁是共享锁，通过读写分离提高性能
 
 可同时多个读线程同时访问，写线程访问时，所有读写线程阻塞
 

@@ -12,7 +12,7 @@
 
 ### 怎么禁用某些自动配置特性？
 
-如果我们想禁用某些自动配置特性，可以使用 *@EnableAutoConfiguration* 注解的 *exclude* 属性来指明。例如，下面的代码段是使 *DataSourceAutoConfiguration* 无效：
+如果我们想禁用某些自动配置特性，可以使用 ==@EnableAutoConfiguration==注解的==exclude==属性来指明。例如，下面的代码段是使 *DataSourceAutoConfiguration* 无效：
 
 ```
 // other annotations
@@ -125,13 +125,13 @@ SpringBoot 对外部配置提供了支持，允许我们在不同环境中运行
 
 SpringBoot中的松绑定适用于配置属性的类型安全绑定。使用松绑定，环境属性的键不需要与属性名完全匹配。这样就可以用驼峰式、短横线式、蛇形式或者下划线分割来命名。
 
-例如，在一个有 *@ConfigurationProperties* 声明的 bean 类中带有一个名为 *myProp* 的属性，它可以绑定到以下任何一个参数中，*myProp*、 *my-prop*、*my_prop* 或者  *MY_PROP*。
+例如，在一个有 ==@ConfigurationProperties== 声明的 bean 类中带有一个名为 *myProp* 的属性，它可以绑定到以下任何一个参数中，*myProp*、 *my-prop*、*my_prop* 或者  *MY_PROP*。
 
 
 
 ### 怎么编写一个集成测试？
 
-当我们使用 Spring 应用去跑一个集成测试时，我们需要一个 *ApplicationContext*。
+当我们使用 Spring 应用去跑一个集成测试时，我们需要一个 ==ApplicationContext==。
 
 为了使我们开发更简单，SpringBoot 为测试提供一个注解 – *@SpringBootTest*。这个注释由其 classes 属性指示的配置类创建一个 *ApplicationContext*。
 
@@ -165,15 +165,15 @@ SpringBoot中的松绑定适用于配置属性的类型安全绑定。使用松�
 
 跨域可以在前端通过 JSONP 来解决，但是 JSONP 只可以发送 GET 请求，无法发送其他类型的请求，在 RESTful 风格的应用中，就显得非常鸡肋，因此我们推荐在后端通过 （CORS，Cross-origin resource sharing） 来解决跨域问题。这种解决方案并非 Spring Boot 特有的，在传统的 SSM 框架中，就可以通过 CORS 来解决跨域问题，只不过之前我们是在 XML 文件中配置 CORS ，现在则是通过 @CrossOrigin 注解来解决跨域问题。关于 CORS ，小伙伴们可以参考：[Spring Boot 中通过 CORS 解决跨域问题](https://mp.weixin.qq.com/s/ASEJwiswLu1UCRE-e2twYQ)
 
-配置类重写 addCorsMappings方法
+定义一个配置类，继承WebMvcConfigurer，配置CorsFilter过滤器，注入容器中
 
-
+在启动类上添加
 
 ###微服务中如何实现 session 共享 ?
 
 在微服务中，一个完整的项目被拆分成多个不相同的独立的服务，各个服务独立部署在不同的服务器上，各自的 session 被从物理空间上隔离开了，但是经常，我们需要在不同微服务之间共享 session 
 
-常见的方案就是 Spring Session + Redis 来实现 session 共享。将所有微服务的 session 统一保存在 Redis 上，当各个微服务对 session 有相关的读写操作时，都去操作 Redis 上的 session 。这样就实现了 session 共享，Spring Session 基于 Spring 中的代理过滤器实现，使得 session 的同步操作对开发人员而言是透明的，非常简便。 session 共享大家可以参考：[Spring Boot 一个依赖搞定 session 共享，没有比这更简单的方案了！](https://mp.weixin.qq.com/s/xs67SzSkMLz6-HgZVxTDFw)
+常见的方案就是 ==Spring Session + Redis== 来实现 session 共享。将所有微服务的 session 统一保存在 Redis 上，当各个微服务对 session 有相关的读写操作时，都去操作 Redis 上的 session 。这样就实现了 session 共享，Spring Session 基于 Spring 中的代理过滤器实现，使得 session 的同步操作对开发人员而言是透明的，非常简便。 session 共享大家可以参考：[Spring Boot 一个依赖搞定 session 共享，没有比这更简单的方案了！](https://mp.weixin.qq.com/s/xs67SzSkMLz6-HgZVxTDFw)
 
 
 
@@ -181,7 +181,27 @@ SpringBoot中的松绑定适用于配置属性的类型安全绑定。使用松�
 
 分布式事务
 
+### ？？微服务同时调用多个接口，怎么支持事务
 
+可以springboot集成Automikos，使用分布式事务会增加响应时间
+
+消息补偿机制来处理分布式事务
+
+### 无状态服务设计
+
+如果一个数据要被多个服务共享才能完成，此数据被称为状态，依赖此数据的服务为有状态的服务
+
+例如，将数据缓存，session缓存存储到分布式缓存中
+
+
+
+### springcache缓存注解
+
+@Cacheable，声明方法是可缓存的，将结果存到缓存中
+
+@Cacheput，每次执行方法将结果存入缓存
+
+@CacheEvict，清除缓存
 
 ### SpringBoot DevTools 的用途是什么？
 
@@ -221,7 +241,7 @@ SpringBoot 开发者工具，或者说 DevTools，是一系列可以让开发过
 
 ###Spring Boot 使用 XML 配置 ?
 
-Spring Boot 推荐使用 Java 配置而非 XML 配置，但是 Spring Boot 中也可以使用 XML 配置，通过 @ImportResource 注解可以引入一个 XML 配置。
+Spring Boot 推荐使用 Java 配置而非 XML 配置，但是 Spring Boot 中也可以使用 XML 配置，通过 ==@ImportResource== 注解可以引入一个 XML 配置。
 
 ### 多切面如何指定优先级
 
@@ -231,7 +251,21 @@ Spring Boot 推荐使用 Java 配置而非 XML 配置，但是 Spring Boot 中�
 
 ###springboot自动配置
 
-@springbootapplication，自动找到starter的factories文件，定位里的autoConfigration类，
+@springbootapplication注解，是有@Configuration、@ComponentScan、@EnableAutoConfiguration注解组成
+
+@EnableAutoConfiguration注解是通过@Import注解导入配置信息到selector类
+
+将配置信息类加载到ioc容器
+
+
+
+### springboot stater的工作原理
+
+启动时会去依赖的starter 包中寻找配置文件，根据配置文件扫描项目依赖的jar包
+
+加载Autoconfig类
+
+根据@conditional注解进行自动配置并注入bean
 
 
 

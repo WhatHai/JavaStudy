@@ -64,6 +64,16 @@ pom文件中添加eureka client的相关坐标
 
 
 
+### eureka服务发现
+
+eureka server内部采用多级缓存来同步服务注册表，readonly缓存，readwrite缓存，定时线程
+
+当一个服务的信息注册到服务注册表中，会立即同步到readwrite缓存中，定时线程负责同步到readonly缓存
+
+消费者定时，比如30s，从readonly缓存拉取注册表信息
+
+
+
 ###Eureka中的自我保护 
 
 微服务第一次注册成功之后，每**30秒**会发送一次**心跳**将服务的实例信息注册到注册中心。通知 Eureka Server 该实例仍然存在。如果超过**90秒**没有发送更新，则服务器将从注册信息中将此服务**移除**。 
@@ -204,7 +214,7 @@ Spring Cloud Feign 支持对请求和响应进行GZIP压缩，以减少通信过
 
 服务隔离：模块独立，无强依赖
 
-熔断降级：当下游服务因访问压力过大而响应变慢或失败，上游服务为了保护系统整体的可用性，可以暂时切断对下游服务的调用
+熔断：当下游服务因访问压力过大而响应变慢或失败，上游服务为了保护系统整体的可用性，可以暂时切断对下游服务的调用
 
 降级：是当某个服务熔断之后，服务器将不再被调用，此时客户端可以自己准备一个本地的fallback回调，返回一个缺省值
 
@@ -334,19 +344,11 @@ Spring Cloud Alibaba与Spring Cloud并非两种对立的技术, Spring Cloud Ali
 
 聚合模式
 
-
-
 代理模式
-
-
 
 分支模式
 
-
-
 异步模式
-
-
 
 ### 熔断降级原理
 
@@ -400,7 +402,7 @@ Eureka Client 服务注册组成，支持心跳机制、健康检查、负载均
 
 
 
-###服务下线 Cancel**
+###服务下线 Cancel
 
 ​        Eureka Client 在程序关闭时向 Eureka Server 发送取消请求；发送请求后，该客户端实例信息将从 Eureka Server 的实例注册表中删除；该下线请求不会自动完成，它需要调用以下内容：
 
@@ -408,19 +410,19 @@ DiscoveryManager.getInstance().shutdownComponent();
 
 
 
-###服务剔除 Eviction**
+###服务剔除 Eviction
 
 ​        在默认的情况下，当 Eureka Client 连续90秒（3个续约周期）没有向 Eureka Server 发送服务续约，即心跳， Eureka Server 会将该服务实例从服务注册列表删除，即服务剔除；
 
 
 
-###Eureka 高可用**
+###Eureka 高可用
 
 ​        Eureka Server 互相注册，Eureka Client 配置所有的 Eureka Server 连接，逗号隔开；
 
 
 
-###Eureka 服务保护**
+###Eureka 服务保护
 
 ​        Eureka 通过心跳来判断服务健康，同时会定期删除超过90秒没有发送心跳的服务；导致 Eureka Server 接收不到心跳包的可能：一是微服务自身的原因（个别服务出现故障），二是微服务与 Eureka 之间的网络故障（大面积故障）；
 

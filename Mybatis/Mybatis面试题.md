@@ -447,3 +447,38 @@ false, statement = { "select last_insert_id()" })
 
 
 
+## 30、Mybatis编程步骤
+
+1、编写持久层接口
+
+2、编写持久层映射文件（与持久层接口包相同，文件名相同）
+
+​	mapper标签的命名空间为接口全限定名
+
+​	每个statement 的id为方法名
+
+3、编写Mybatis配置文件
+
+​	配置事务类型、数据源，引入mapper映射文件
+
+4、编码
+
+​	1.读取配置文件
+
+​	2.创建SqlSessionFactoryBuilder
+
+​	3.使用SqlSessionFactoryBuilder和配置文件创建SqlSessionFactory
+
+​	4.创建SqlSession
+
+​	5.创建DAO接口代理对象
+
+​	6.使用代理对象执行持久层方法
+
+
+
+批量更新
+
+
+
+复杂更新

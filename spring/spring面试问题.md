@@ -76,7 +76,7 @@ beans>
 
 ​	@Autowired ：按类型自动装配
 
-​	@Qualifier：按名称，当一个类型有过个bean时，spring按类型装配不能识别，可以用@Qualifer注解指定bean的ID
+​	@Qualifier：按名称，当一个类型有多个bean时，spring按类型装配不能识别，可以用@Qualifer注解指定bean的ID
 
 
 
@@ -207,7 +207,7 @@ AOP(Aspect-Oriented Programming:面向切面编程)能够将那些与业务无�
 
 应用：事务处理、日志管理、权限控制
 
-**Spring AOP就是基于动态代理的**，如果要代理的对象，实现了某个接口，那么Spring AOP会使用**JDK Proxy**，去创建代理对象。而对于没有实现接口的对象，就无法使用 JDK Proxy 去进行代理了，这时候Spring AOP会使用**Cglib** ，这时候Spring AOP会使用 **Cglib** 生成一个被代理对象的子类来作为代理。
+**Spring AOP就是基于==动态代理的==**，如果要代理的对象，实现了==某个接口==，那么Spring AOP会使用**JDK Proxy**，去创建代理对象。而对于没有实现接口的对象，就无法使用 JDK Proxy 去进行代理了，这时候Spring AOP会使用**Cglib** ，这时候Spring AOP会使用 **Cglib** 生成一个==被代理对象的子类==来作为代理。
 
 当然你也可以使用 AspectJ ,Spring AOP 已经集成了AspectJ  ，AspectJ  应该算的上是 Java 生态系统中最完整的 AOP 框架了。
 
@@ -379,6 +379,30 @@ public OneService getService(status) {
 ```
 
 
+
+### 5.7 解决循环引用
+
+1、循环依赖通过==属性注入==依赖的时候
+
+bean都是==singleton==，那么无论先获取哪个bean，都能==成功==，因为单例是在==类加载==时候就有实莉。
+bean都是==prototype==，那么无论先获取哪个bean，都会==失败==。
+如果循环依赖的bean中有singleton，也有prototype，那么当==先获取的那个bean是singleton==时，就会成功，否则失败。
+
+2、构造器注入，都会失败
+
+### 自动装配
+
+1. byName:通过参数名 自动装配，Spring 容器在配置文件中发现 bean 的 autowire 属性被设 
+
+   置成 byname，之后容器试图匹配、装配和该 bean 的属性具有相同名字的 bean。 
+
+2. byType:通过参数类型自动装配，Spring 容器在配置文件中发现 bean 的 autowire 属性被 设置成 byType，之后容器试图匹配、装配和该 bean 的属性具有相同类型的 bean。如果有多 
+
+   个 bean 符合条件，则抛出错误。 
+
+3. constructor:这个方式类似于 byType， 但是要提供给构造器参数，如果没有确定的带参数 的构造器参数类型，将会抛出异常。
+
+     
 
 
 
@@ -584,6 +608,31 @@ web.xml添加characterEncodingFilter过滤器
 设置过滤器的值，init-param中指定encoding编码
 
 然后启动过滤器forceEncoding为true
+
+
+
+springboot解决方式，配置类继承 ==WebMvcConfigurerAdapter==
+
+```java
+@Configurationpublic 
+class CustomMVCConfiguration extends WebMvcConfigurerAdapter {
+
+	@Bean
+	public HttpMessageConverter<String> responseBodyConverter() {
+		StringHttpMessageConverter converter = new StringHttpMessageConverter(Charset.forName("UTF-8")); 
+		return converter;
+	} 
+	@Override
+	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) { 
+		super.configureMessageConverters(converters);
+		converters.add(responseBodyConverter());
+	} 
+	@Override
+	public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+		configurer.favorPathExtension(false);
+	}
+}
+```
 
 
 

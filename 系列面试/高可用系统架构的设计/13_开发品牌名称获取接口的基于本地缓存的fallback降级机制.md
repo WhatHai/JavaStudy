@@ -68,13 +68,3 @@ HystrixCommandProperties.Setter()
 
 ```
 
-# 参考
-
-- 《Java工程师面试突击第1季-中华石杉老师》
-
-# X 交流学习
-![](https://img-blog.csdnimg.cn/20190504005601174.jpg)
-## [Java交流群](https://jq.qq.com/?_wv=1027&k=5UB4P1T)
-## [博客](http://www.shishusheng.com)
-
-## [Github](https://github.com/Wasabi1234)
