@@ -105,6 +105,12 @@ Apache Dubbo (incubating) |ˈdʌbəʊ| 是一款高性能、轻量级的开源Ja
 - l  服务消费者，从提供者地址列表中，基于软负载均衡算法，选一台提供者进行调用，如果调用失败，再选另一台调用。
 - l  服务消费者和提供者，在内存中累计调用次数和调用时间，定时每分钟发送一次统计数据到监控中心。
 
+使用dubbo前：
+
+![image-20200906210949962](images/dubbo-之前的调用.png)
+
+
+
 ## 3、dubbo环境搭建
 
 ### 3.1）、【windows】-安装zookeeper
@@ -683,15 +689,21 @@ dubbo推荐在Provider上尽量多配置Consumer端属性：
 
 ###Random LoadBalance
 
+默认的，基于权重的随机负载均衡机制
+
 ==随机==，按权重设置随机概率。假设3台机器提供服务，根据权重大约算出请求落在每台机器的概率
 
 在一个截面上碰撞的概率高，但调用量越大分布越均匀，而且按概率使用权重后也比较均匀，有利于动态调整提供者权重。
+
+![随机负载均衡](images/随机负载均衡.jpeg)
 
 ###RoundRobin LoadBalance
 
 ==轮循==，按公约后的权重设置轮循比率。
 
 存在慢的提供者==累积请求==的问题，比如：第二台机器很慢，但没挂，当请求调到第二台时就卡在那，久而久之，所有请求都卡在调到第二台上。
+
+![轮询负载均衡](images/轮询负载均衡.jpeg)
 
 ###LeastActive LoadBalance**
 
@@ -718,8 +730,6 @@ dubbo推荐在Provider上尽量多配置Consumer端属性：
 ```
  <dubbo:parameter key="hash.nodes" value="320" />
 ```
-
-   **Random LoadBalance**   随机，按权重设置随机概率。   在一个截面上碰撞的概率高，但调用量越大分布越均匀，而且按概率使用权重后也比较均匀，有利于动态调整提供者权重。   **RoundRobin LoadBalance**   轮循，按公约后的权重设置轮循比率。   存在慢的提供者累积请求的问题，比如：第二台机器很慢，但没挂，当请求调到第二台时就卡在那，久而久之，所有请求都卡在调到第二台上。   **LeastActive LoadBalance**   最少活跃调用数，相同活跃数的随机，活跃数指调用前后计数差。   使慢的提供者收到更少请求，因为越慢的提供者的调用前后计数差会越大。   **ConsistentHash LoadBalance**   一致性 Hash，相同参数的请求总是发到同一提供者。   当某一台提供者挂时，原本发往该提供者的请求，基于虚拟节点，平摊到其它提供者，不会引起剧烈变动。算法参见：http://en.wikipedia.org/wiki/Consistent_hashing   缺省只对第一个参数 Hash，如果要修改，请配置   <dubbo:parameter key="hash.arguments" value="0,1"   />   缺省用 160 份虚拟节点，如果要修改，请配置   <dubbo:parameter key="hash.nodes" value="320" />   
 
 **xml 配置方式**
 
@@ -785,7 +795,6 @@ registry.register(URL.valueOf("override://0.0.0.0/com.foo.BarService?category=co
 - mock=force:return+null 表示消费方对该服务的方法调用都直接返回 null 值，不发起远程调用。用来屏蔽不重要服务不可用时对调用方的影响。
 - 还可以改为 mock=fail:return+null 表示消费方对该服务的方法调用在失败后，再返回 null 值，不抛异常。用来容忍不重要服务不稳定时对调用方的影响。
 
-  
 
 ### 2、集群容错
 
@@ -916,13 +925,17 @@ public class HelloServiceImpl implements HelloService {
 
 ​         @Reference(version = "1.0.0")       private   HelloService demoService;             @HystrixCommand(fallbackMethod = "reliable")       public   String doSayHello(String name) {           return   demoService.sayHello(name);       }       public   String reliable(String name) {           return   "hystrix fallback value";       }   
 
+
+
 # 四、dubbo原理  
+
+
 
 ## 1、RPC原理
 
 <http://www.importnew.com/22003.html>
 
-![](images/RPC原理.png)   
+![](/Users/hayder/Documents/JavaStudy/Dubbo/images/RPC%E5%8E%9F%E7%90%86.png)   
 
 一次完整的RPC调用流程（同步调用，异步另说）如下： 
 
@@ -938,13 +951,22 @@ public class HelloServiceImpl implements HelloService {
 
 RPC框架的目标就是要==2~8==这些步骤都封装起来，这些细节对用户来说是透明的，不可见的。
 
-###SOA架构
+![rpc原理时序图](/Users/hayder/Documents/JavaStudy/Dubbo/images/rpc%E5%8E%9F%E7%90%86%E6%97%B6%E5%BA%8F%E5%9B%BE.jpeg)
+
+### SOA架构
 
 SOA 面向服务的架构：把工程拆分成==服务层==、==表现层==两个工程。服务层中包含业务逻辑只对外提供服务。表现层处理和页面的交互。
 
-SOA中有两个主要角色：服务提供者（Provider）和服务使用者（Consumer）
+SOA中有两个主要角色：==服务提供者（Provider）和服务使用者（Consumer）==
 
+服务调用可以HTTP，为何要用dubbo？
 
+服务治理！
+
+1. **负载均衡**——同一个服务部署在不同的机器时该调用那一台机器上的服务。
+2. **服务调用链路生成**——随着系统的发展，服务越来越多，服务间依赖关系变得错踪复杂，甚至分不清哪个应用要在哪个应用之前启动，架构师都不能完整的描述应用的架构关系。Dubbo 可以为我们解决服务之间互相是如何调用的。
+3. **服务访问压力以及时长统计、资源调度和治理**——基于访问压力实时管理集群容量，提高集群利用率。
+4. **服务降级**——某个服务挂掉之后调用备用服务。
 
 
 
@@ -954,11 +976,11 @@ Netty是一个异步事件驱动的网络应用程序框架， 用于快速开�
 
 BIO：(Blocking IO)
 
-   ![](images/BIO.png)
+   ![](/Users/hayder/Documents/JavaStudy/Dubbo/images/BIO.png)
 
 NIO (Non-Blocking IO)
 
-   ![](images/NIO.png)
+   ![](/Users/hayder/Documents/JavaStudy/Dubbo/images/NIO.png)
 
 Selector 一般称 为**选择器** ，也可以翻译为 **多路复用器，**
 
@@ -966,13 +988,13 @@ Connect（连接就绪）、Accept（接受就绪）、Read（读就绪）、Wri
 
 Netty基本原理：
 
-![](images/Netty基本原理.png)   
+![](/Users/hayder/Documents/JavaStudy/Dubbo/images/Netty%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86.png)   
 
  
 
 ## dubbo架构
 
-![](images/Dubbo基本概念.png)
+![](/Users/hayder/Documents/JavaStudy/Dubbo/images/Dubbo%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5.png)
 
 - **Provider：** 暴露服务的服务提供方
 - **Consumer：** 调用远程服务的服务消费方
@@ -989,7 +1011,7 @@ Netty基本原理：
 5. 服务消费者，从提供者地址列表中，基于==软负载==均衡算法，选一台提供者进行调用，如果调用失败，再选另一台调用。
 6. 服务消费者和提供者，在内存中累计调用次数和调用时间，定时每分钟发送一次统计数据到监控中心。
 
-关键：
+关键点：
 
 - **注册中心负责服务地址的注册与查找，相当于目录服务，服务提供者和消费者只在启动时与注册中心交互，注册中心不转发请求，压力较小**
 - **监控中心负责统计各服务调用次数，调用时间等，统计先在内存汇总后每分钟一次发送到监控中心服务器，并以报表展示**
@@ -1006,15 +1028,16 @@ Netty基本原理：
 
 ### 为什么用dubbo不是http
 
-
+dubbo可以服务治理，比如负载均衡，降级熔断等等
 
 
 
 ### 1、dubbo原理  -框架设计 
 
-- ==service层==，接口层，给服务提供者和消费者来实现
+![dubbo工作原理图](/Users/hayder/Documents/JavaStudy/Dubbo/images/dubbo%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E5%9B%BE.jpeg)
 
--  ==config 配置层==：对外配置接口，以 ServiceConfig, ReferenceConfig 为中心，可以直接初始化配置类，也可以通过 spring 解析配置生成配置类
+- ==service层==，接口层，给服务提供者和消费者来实现
+- ==config 配置层==：对外配置接口，以 ServiceConfig, ReferenceConfig 为中心，可以直接初始化配置类，也可以通过 spring 解析配置生成配置类
 - ==proxy 服务代理层==：服务接口透明代理，生成服务的客户端 Stub 和服务器端 Skeleton, 以 ServiceProxy 为中心，扩展接口为 ProxyFactory
 - ==registry 注册中心层==：封装服务地址的注册与发现，以服务 URL 为中心，扩展接口为 RegistryFactory, Registry, RegistryService
 - ==cluster 路由层==：封装多个提供者的路由及负载均衡，并桥接注册中心，以 Invoker 为中心，扩展接口为 Cluster, Directory, Router, LoadBalance
@@ -1032,7 +1055,7 @@ Netty基本原理：
 
 ### 3、dubbo原理  -服务暴露
 
-   ![](images/dubbo原理 -服务暴露.png)
+   ![](/Users/hayder/Documents/JavaStudy/Dubbo/images/dubbo%E5%8E%9F%E7%90%86%20-%E6%9C%8D%E5%8A%A1%E6%9A%B4%E9%9C%B2.png)
 
 ### 4、dubbo原理  -服务引用
 
@@ -1040,7 +1063,7 @@ Netty基本原理：
 
 ### 5、dubbo原理  -服务调用
 
-![](images/dubbo原理 -服务调用.png)   
+![](/Users/hayder/Documents/JavaStudy/Dubbo/images/dubbo%E5%8E%9F%E7%90%86%20-%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8.png)   
 
  
 
@@ -1073,3 +1096,4 @@ zookeeper宕机与dubbo直连的情况在面试中可能会被经常问到，所
  @Reference(url = "127.0.0.1:20880")   
  HelloService helloService;
 ```
+
