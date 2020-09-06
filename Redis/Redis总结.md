@@ -13,7 +13,7 @@
 
 字符串类型：key-value
 
-散列类型：key-field-value【一个key可以有多个field，可用来存对象，key为对象名，field为属性，value为值】
+hash类型：key-field-value【一个key可以有多个field，可用来存对象，key为对象名，field为属性，value为值】
 
 列表类型：list，有序字符串列表，双向存取，基于双向链表实现，可实现消息队列功能。lpush+lpop 实现栈；lpush+rpop实现队列；
 
@@ -31,7 +31,9 @@
 
 
 
-有序集合怎么实现？
+## 有序集合怎么实现？
+
+
 
 类a，类b，spring如何构建循环引用？
 
@@ -568,7 +570,7 @@ public Object getObjectInclNullById(Integer id) {
 
 
 
-##项目中的缓存
+##项目中的缓存场景
 
 项目中缓存是如何使用的？为什么要用缓存？缓存使用不当会造成什么后果？
 
