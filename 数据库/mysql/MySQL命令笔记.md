@@ -38,6 +38,18 @@ SHOW VARIABLES -- 显示系统变量信息
         同时删除该数据库相关的目录及其目录内容
 ```
 
+### SQL分类
+
+DQL（数据查询语言）select
+
+DML（数据操作语言）insert、delete、update
+
+DDL（数据定义语言）create、drop、alter
+
+DCL（数据控制语言）grant：把权限授予用户、revoke：把权限从用户收回
+
+TPL（TCL，事务控制语言）：commit、rollback
+
 ### 建表规范
 
 
@@ -401,6 +413,7 @@ set(val1, val2, val3...)
 1. PRIMARY 主键
     - 能唯一标识记录的字段，可以作为主键。
     - 一个表只能有一个主键。
+    - 复合型、整数型、字符型
     - 主键具有唯一性。
     - 声明字段时，用 primary key 标识。
         也可以在字段列表之后声明
@@ -592,7 +605,7 @@ h. DISTINCT, ALL 选项
 select info.id, info.name, info.stu_num, extra_info.hobby, extra_info.sex from info, extra_info where info.stu_num = extra_info.stu_id;
 ```
 
-### TRUNCATE 
+### 清空数据TRUNCATE 
 
 ```mysql
 /* TRUNCATE */ ------------------
