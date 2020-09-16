@@ -445,11 +445,39 @@ this is destory of lifeBean com.bean.LifeBean@573f2bb1
 **Spring 容器可以管理 singleton 作用域下 bean 的生命周期，在此作用域下，Spring 能够精确地知道bean何时被创建，何时初始化完成，以及何时被销毁。而对于 prototype 作用域的bean，Spring只负责创建，当容器创建了 bean 的实例后，bean 的实例就交给了客户端的代码管理，Spring容器将不再跟踪其生命周期，并且不会管理那些被配置成prototype作用域的bean的生命周期。**
 
 
-# 三 说明
+# 三 循环依赖
 
-本文的完成结合了下面两篇文章，并做了相应修改：
+https://mp.weixin.qq.com/s/eoOC5c7cF_PZmXiv6ke4cg
 
-- https://blog.csdn.net/fuzhongmin05/article/details/73389779
-- https://yemengying.com/2016/07/14/spring-bean-life-cycle/
+## 一、构造参数注入，bean池解决循环依赖
 
-由于本文非本人独立原创，所以未声明为原创！在此说明！
+Spring容器会将每一个正在创建的Bean 作为标识符放在一个“当前创建Bean池”中，==Bean标识符==在创建过程中将一直保持在这个池中
+
+因此如果在创建Bean过程中发现，在“当前创建Bean池”里已经有Bean标识符，抛出BeanCurrentlyInCreationException异常表示循环依赖
+
+创建完毕的Bean将从“当前创建Bean池”中清除掉。
+
+##二setter方式注入单例
+
+由bean的生命周期可知，实例化之后再设置属性
+
+Spring先是用构造实例化Bean对象 ，此时 [Spring](http://mp.weixin.qq.com/s?__biz=MzI3ODcxMzQzMw==&mid=2247492151&idx=2&sn=0b8fbb5f150d4ee427c0ab7969d4abd1&chksm=eb506701dc27ee17cf3d49899ce7c7643c0866c83264b1d449e4611836adcd7bcd1669a38252&scene=21#wechat_redirect) 会将这个实例化结束的对象放到一个Map中，并且 [Spring](http://mp.weixin.qq.com/s?__biz=MzI3ODcxMzQzMw==&mid=2247492151&idx=2&sn=0b8fbb5f150d4ee427c0ab7969d4abd1&chksm=eb506701dc27ee17cf3d49899ce7c7643c0866c83264b1d449e4611836adcd7bcd1669a38252&scene=21#wechat_redirect) 提供了获取这个未设置属性的实例化对象引用的方法。 
+
+结合我们的实例来看，当Spring实例化了StudentA、StudentB、StudentC后，紧接着会去设置对象的属性，此时StudentA依赖StudentB，就会去Map中取出存在里面的单例StudentB对象，以此类推，不会出来循环的问题喽、
+
+##三setter注入，原型作用域
+
+scope="prototype" 每次请求都会创建一个实例对象。
+
+有状态的bean都使用Prototype作用域，无状态的一般都使用singleton单例作用域。
+
+对于“prototype”作用域Bean，Spring容器无法完成依赖注入，因为“prototype”作用域的Bean，Spring容器不进行缓存，因此无法提前暴露一个创建中的Bean。
+
+
+
+
+
+
+
+
+

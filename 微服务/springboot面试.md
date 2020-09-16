@@ -267,7 +267,9 @@ Spring Boot 推荐使用 Java 配置而非 XML 配置，但是 Spring Boot 中�
 
 根据@conditional注解进行自动配置并注入bean
 
+### 自定义starter
 
+https://mp.weixin.qq.com/s/EZzfczJ6vL0yS36wJokV7A
 
 ### springboot监视器
 

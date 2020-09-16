@@ -2,6 +2,10 @@
 
 Map接口下的集合以键值对方式存在的双列集合，key不能相同。Map没有继承Collection
 
+cnblogs.com/Young111/p/11519952.html?utm_source=gold_browser_extension
+
+https://mp.weixin.qq.com/s/cXNHjxAU7oP1SgYfdsXJ-w
+
 ## HashMap 简介
 
 HashMap 主要用来存放键值对，它基于哈希表的Map接口实现
@@ -429,7 +433,11 @@ static int indexFor(int h, int length) {
 }
 ```
 
+### 如何计算hash值
 
+是通过 hashCode() 的高 16 位异或低 16 位实现的：(h = k.hashCode()) ^ (h >>> 16)，主要是从速度，功效和质量来考虑的，减少系统的开销，也不会造成因为高位没有参与下标的计算，从而引起的碰撞。
+
+用异或，保证了对象的 hashCode 的 32 位值只要有一位发生改变，整个 hash() 返回值就会改变。尽可能的减少碰撞。
 
 ### 扩容
 
