@@ -311,13 +311,52 @@ mv 目录名称 目录的新位置： 移动目录的位置---剪切（改）
 
 ## 文件内容查看
 
+#### tail 
+
+```shell
+命令格式: tail[必要参数][选择参数][文件]
+-f 循环读取
+-q 不显示处理信息
+-v 显示详细的处理信息
+-c<数目> 显示的字节数
+-n<行数> 显示行数
+-q, --quiet, --silent 从不输出给出文件名的首部
+-s, --sleep-interval=S 与-f合用,表示在每次反复的间隔休眠S秒
+```
+
+常用：
+
+```shell
+tail  -n  10   test.log   查询日志尾部最后10行的日志;
+tail  -n +10   test.log   查询10行之后的所有日志;
+tail  -fn 10   test.log   循环实时查看最后1000行记录(最常用的)
+```
+
+配合grep
+
+```shell
+ tail -fn 1000 test.log | grep '关键字'
+```
+
+翻页
+
+```js
+tail -n 4700  aa.log |more -1000 可以进行多屏显示(ctrl + f 或者 空格键可以快捷键)
+```
+
+
+
 #### cat  
 
-​	查看显示文件内容 ：cat filename
+```shell
+$cat filename		显示整个文件
+$cat > filename   从键盘创建文件：只能创建不能编辑已有文件
+$cat file1 file2 > file 合并文件：只能创建不能编辑
+$cat -n textfile1 > textfile2
+$cat : >textfile2
+```
 
-​	    从键盘创建文件：cat > filename只能创建不能编辑已有文件
-
-​	    合并文件： cat file1 file2 > file 
+​	==`>` 意思是创建，`>>`是追加==   
 
 - `-A`, `--show-all` 等价于 `-vET`
 - `-b`, `--number-nonblank` 对非空输出行编号
@@ -354,19 +393,49 @@ nl   显示的时候，顺道输出行号！
 
 ####less 
 
-与 more 类似，但是比 more 更好的是，他可以往前翻页！
+less查日志：
 
-可以使用键盘上的PgUp和PgDn向上 和向下翻页，q结束查看
+```js
+less log.log
+shift + G 命令到文件尾部  然后输入 ？加上你要搜索的关键字例如 ？1213
+按 n 向上查找关键字
+shift+n  反向查找关键字
+```
+
+常用命令：
+
+```js
+less与more类似，使用less可以随意浏览文件，而more仅能向前移动，不能向后移动，而且 less 在查看之前不会加载整个文件。
+less log2013.log 查看文件
+ps -ef | less   ps查看进程信息并通过less分页显示
+history | less   查看命令历史使用记录并通过less分页显示
+less log2013.log log2014.log   浏览多个文件
+常用命令参数：
+-b <缓冲区大小> 设置缓冲区的大小
+-g 只标志最后搜索的关键词
+-i 忽略搜索时的大小写
+-m 显示类似more命令的百分比
+-N 显示每行的行号
+-o <文件名> 将less 输出的内容在指定文件中保存起来
+-Q 不使用警告音
+-s 显示连续空行为一行
+/字符串：向下搜索"字符串"的功能
+?字符串：向上搜索"字符串"的功能
+n：重复前一个搜索（与 / 或 ? 有关）
+N：反向重复前一个搜索（与 / 或 ? 有关）
+b 向后翻一页
+h 显示帮助界面
+q 退出less 命令
+```
 
 ####head 
 
-查看文件头部
+跟tail是相反的head是看前多少行日志
 
-####tail 
-
-查看文件末尾
-
-- **tail-10 ：** 查看文件的后10行，Ctrl+C结束
+```js
+head -n  10  test.log   查询日志文件中的头10行日志;
+head -n -10  test.log   查询日志文件除了最后10行的其他所有日志;
+```
 
 
 

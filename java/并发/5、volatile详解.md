@@ -18,11 +18,29 @@
 
 ​	保证多线程访问共享变量的内存可见性
 
+```
+public class Test{
+	private static volatile boolean flag = true;
+    public static void main (String[] args) {
+        new Thread(() -> {
+            while(flag){
+                
+            }
+            System.out.println("end");
+        }).stard();
+        Thread.sleep(10000);
+        flag = false;
+    }
+}
+```
+
+不加volatile程序不会结束。因为子线程将flag加载到自己的工作内存，主线程中改变flag的值，子线程无法获取
+
 ## volatile使用场景
 
 ​	状态标记量
 
-​	double check 单例双重检查
+​	DCL单例双重检查
 
 ## volatile原理
 
