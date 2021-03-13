@@ -95,6 +95,8 @@ global session 作用域类似于标准的 HTTP session 作用域，不过仅仅
 
 # 二  bean的生命周期
 
+![spring架构](images/spring架构.jpeg)
+
 Spring Bean是Spring应用中最最重要的部分了。所以来看看Spring容器在初始化一个bean的时候会做那些事情，顺序是怎样的，在容器关闭的时候，又会做哪些事情。
 
 > spring版本：4.2.3.RELEASE
@@ -129,6 +131,22 @@ Spring容器关闭
 ```
 
 先来看看，Spring在Bean从创建到销毁的生命周期中可能做得事情。
+
+### BeanDefinition
+
+
+
+### BeanDefinitionReader
+
+读取spring配置文件的内容，并转换成IOC容器内部数据结构：BeanDifinition
+
+###BeanFactory
+
+一个bean容器，内部维护着一个BeanDefinition Map，可以根据BeanDefinition的描述创建和管理bean 有三个直接子类：ListableBeanFactory、HierarchicalBeanFactory、AutowireCapableBeanFactory DefaultListableBeanFactory为最终默认实现，它实现了所有接口
+
+### BeanFactoryPostProcessor
+
+
 
 
 ### initialization 和 destroy
@@ -212,9 +230,11 @@ public class GiraffeService {
 
 ```
 
-### 实现*Aware接口 在Bean中使用Spring框架的一些对象
+### Aware接口 
 
-有些时候我们需要在 Bean 的初始化中使用 Spring 框架自身的一些对象来执行一些操作，比如获取 ServletContext 的一些参数，获取 ApplicaitionContext 中的 BeanDefinition 的名字，获取 Bean 在容器中的名字等等。为了让 Bean 可以获取到框架自身的一些对象，Spring 提供了一组名为*Aware的接口。
+有些时候我们需要在 Bean 的初始化中使用 Spring 框架自身的一些对象来执行一些操作，比如获取 ServletContext 的一些参数，获取 ApplicaitionContext 中的 BeanDefinition 的名字，获取 Bean 在容器中的名字等等。==为了让 Bean 可以获取到框架自身的一些对象==，Spring 提供了一组名为*Aware的接口。
+
+比如有一个对象，想通过对象获取bean工厂。就实现一个BeanFactoryAware接口
 
 这些接口均继承于`org.springframework.beans.factory.Aware`标记接口，并提供一个将由 Bean 实现的set*方法,Spring通过基于setter的依赖注入方式使相应的对象可以被Bean使用。
 网上说，这些接口是利用观察者模式实现的，类似于servlet listeners，目前还不明白，不过这也不在本文的讨论范围内。
@@ -449,11 +469,32 @@ this is destory of lifeBean com.bean.LifeBean@573f2bb1
 
 https://mp.weixin.qq.com/s/eoOC5c7cF_PZmXiv6ke4cg
 
+###1、循环依赖简介：
+
+循环依赖：A类中有一个B类属性，B类中有一个A类属性。
+
+spring是先实例化在堆中开辟内存空间；初始化在设置属性。实例化的时候，
+
+解决：三级缓存提前暴露
+
+​	三级缓存：三个map结构
+
+源码：
+
+- spring源码，在bean实例化后，初始化前，先将bean对象缓存，以解决循环依赖。
+
+- 这时候对象还没有属性值，主要是将对象暴露出去
+
+
+![spring循环依赖源码](images/spring循环依赖源码.png)
+
+
+
 ## 一、构造参数注入，bean池解决循环依赖
 
 Spring容器会将每一个正在创建的Bean 作为标识符放在一个“当前创建Bean池”中，==Bean标识符==在创建过程中将一直保持在这个池中
 
-因此如果在创建Bean过程中发现，在“当前创建Bean池”里已经有Bean标识符，抛出BeanCurrentlyInCreationException异常表示循环依赖
+因此如果在创建Bean过程中发现，在“当前创建Bean池”里已经有Bean标识符，抛出BeanCurrentlyInCreationException异常表示循环依赖，所以构造器注入的无法解决循环依赖。
 
 创建完毕的Bean将从“当前创建Bean池”中清除掉。
 
