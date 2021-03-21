@@ -1,5 +1,7 @@
 > 本文整理自网络，原文出处暂不知，对原文做了较大的改动，在此说明！
 
+##springmvc原理
+
 ### 先来看一下什么是 MVC 模式
 
 MVC 是一种设计模式.
@@ -267,3 +269,287 @@ HandlerExceptionResolver接口-异常处理接口
 ViewResolver接口解析View视图。
 
 UrlBasedViewResolver类 通过配置文件，把一个视图名交给到一个View来处理。
+
+## 面试Spring MVC
+
+### 1 说说自己对于 Spring MVC 了解?
+
+谈到这个问题，我们不得不提提之前 Model1 和 Model2 这两个没有 Spring MVC 的时代。
+
+- **Model1 时代** : 很多学 Java 后端比较晚的朋友可能并没有接触过  Model1 模式下的 JavaWeb 应用开发。在 Model1 模式下，整个 Web 应用几乎全部用 JSP 页面组成，只用少量的 JavaBean 来处理数据库连接、访问等操作。这个模式下 JSP 即是控制层又是表现层。显而易见，这种模式存在很多问题。比如①将控制逻辑和表现逻辑混杂在一起，导致代码重用率极低；②前端和后端相互依赖，难以进行测试并且开发效率极低；
+- **Model2 时代** ：学过 Servlet 并做过相关 Demo 的朋友应该了解“Java Bean(Model)+ JSP（View,）+Servlet（Controller）  ”这种开发模式,这就是早期的 JavaWeb MVC 开发模式。Model:系统涉及的数据，也就是 dao 和 bean。View：展示模型中的数据，只是用来展示。Controller：处理用户请求都发送给 ，返回数据给 JSP 并展示给用户。
+
+Model2 模式下还存在很多问题，Model2的抽象和封装程度还远远不够，使用Model2进行开发时不可避免地会重复造轮子，这就大大降低了程序的可维护性和复用性。于是很多JavaWeb开发相关的 MVC 框架应运而生比如Struts2，但是 Struts2 比较笨重。随着 Spring 轻量级开发框架的流行，Spring 生态圈出现了 Spring MVC 框架， Spring MVC 是当前最优秀的 MVC 框架。相比于 Struts2 ， Spring MVC 使用更加简单和方便，开发效率更高，并且 Spring MVC 运行速度更快。
+
+MVC 是一种设计模式,Spring MVC 是一款很优秀的 MVC 框架。Spring MVC 可以帮助我们进行更简洁的Web层的开发，并且它天生与 Spring 框架集成。Spring MVC 下我们一般把后端项目分为 Service层（处理业务）、Dao层（数据库操作）、Entity层（实体类）、Controller层(控制层，返回数据给前台页面)。
+
+**Spring MVC 的简单原理图如下：**
+
+![](http://my-blog-to-use.oss-cn-beijing.aliyuncs.com/18-10-11/60679444.jpg)
+
+### 2 SpringMVC 工作原理了解吗?
+
+**原理如下图所示：**
+![SpringMVC运行原理](http://my-blog-to-use.oss-cn-beijing.aliyuncs.com/18-10-11/49790288.jpg)
+
+上图的一个笔误的小问题：Spring MVC 的入口函数也就是前端控制器 `DispatcherServlet` 的作用是接收请求，响应结果。
+
+**流程说明（重要）：**
+
+1. 客户端（浏览器）发送请求，直接请求到 `DispatcherServlet`。
+2. `DispatcherServlet` 根据请求信息调用 `HandlerMapping`，解析请求对应的 `Handler`。
+3. 解析到对应的 `Handler`（也就是我们平常说的 `Controller` 控制器）后，开始由 `HandlerAdapter` 适配器处理。
+4. `HandlerAdapter` 会根据 `Handler `来调用真正的处理器开处理请求，并处理相应的业务逻辑。
+5. 处理器处理完业务后，会返回一个 `ModelAndView` 对象，`Model` 是返回的数据对象，`View` 是个逻辑上的 `View`。
+6. `ViewResolver` 会根据逻辑 `View` 查找实际的 `View`。
+7. `DispaterServlet` 把返回的 `Model` 传给 `View`（视图渲染）。
+8. 把 `View` 返回给请求者（浏览器）
+
+### 3 拦截器、过滤器和监听器
+
+#### 1 拦截器：
+
+​	springMVC中拦截器用于对处理器预处理和后处理，是AOP的具体应用
+
+​	自定义拦截器，实现HandlerInterceptor接口，然后在配置文件中配置，<mvc:interceptor 标签配置mapping和拦截器bean
+
+​	多个拦截器执行顺序：
+
+​		按配置顺序执行，第一个放行才会执行第二个的preHandle（）方法；不放行就直接响应浏览器
+
+​		如果第二个不放行，就执行第一个拦截器的afterCompletion（）方法，然后响应浏览器
+
+​		如果都响应，执行完controller方法后，拦截链从后往前执行postHandler（）方法
+
+​		postHandler 方法执行完，再从后往前执行afterCompletion方法
+
+![springMVC拦截器执行流程](/Users/hayder/Documents/JavaStudy/spring/images/springMVC%E6%8B%A6%E6%88%AA%E5%99%A8%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B.png)
+
+**应用：**
+
+​	用户是否登录，跳转登录页
+
+​	request.getRequestDispatcher("/WEB-INF/jsp/login.jsp").forward(request,response）；
+
+**自定义拦截器**：
+
+​	继承 HandlerInterceptorAdapter类也可以通过实现HandlerInterceptor这个接口
+
+```java
+public class LogCostInterceptor implements HandlerInterceptor { long start = System.currentTimeMillis();
+    @Override public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o) throws Exception {
+        start = System.currentTimeMillis(); return true;
+    }
+    @Override public void postHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView) throws Exception {
+        System.out.println("Interceptor cost="+(System.currentTimeMillis()-start));
+    }
+ 	//视图渲染完成后执行
+    @Override public void afterCompletion(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e) throws Exception {
+    }
+}
+```
+
+```java
+@Configuration 
+public class InterceptorConfig extends WebMvcConfigurerAdapter {
+ 
+    @Override public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new LogCostInterceptor()).addPathPatterns("/**"); 
+        super.addInterceptors(registry);
+    }
+}
+```
+
+#### 过滤器
+
+自定义过滤器实现 Filter 接口
+
+**1、**使用spring boot提供的**FilterRegistrationBean注册Filter**
+
+**2、**使用**原生servlet注解定义Filter**
+两种方式的本质都是一样的，**都是去FilterRegistrationBean注册自定义Filter**
+
+```java
+@Configuration
+public class FilterConfig {
+
+    @Bean
+    public FilterRegistrationBean registrationBean() {
+       ** FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(new** **MyFilter());**
+        filterRegistrationBean.addUrlPatterns("/*");
+        return filterRegistrationBean;
+    }
+}
+```
+
+
+
+
+
+#### 区别：
+
+![过滤器和拦截器](images/过滤器和拦截器.jpeg)
+
+![过滤器拦截器执行顺序](images/过滤器拦截器执行顺序.png)
+
+
+
+- 过滤器只能在请求的前后使用，可以获取request请求却拿不到控制器信息；而拦截器可以控制器和其中的方法
+
+- 触发时机不同：过滤器是在请求进入tomcat容器后，到达servlet之前预处理。
+
+- 拦截器是springAOP的具体应用，可以获取IOC容器中的bean，注入一股service就可以调用业务逻辑；过滤器是基于servlet规范，不需要依赖spring，不能获取IOC容器的bean？？？
+
+- 过滤器的执行由**Servlet容器回调完成**，而**拦截器**通常通**过动态代理（反射）**的方式来执行
+
+
+#### 应用
+
+**拦截器应用场景**：
+
+拦截器本质上是面向切面编程（AOP），符合横切关注点的功能都可以放在拦截器中来实现，主要的应用场景包括：
+
+- 登录验证，判断用户是否登录。
+- 权限验证，判断用户是否有权限访问资源，如校验token
+- 日志记录，记录请求操作日志（用户ip，访问时间等），以便统计请求访问量。
+- 处理cookie、本地化、国际化、主题等。
+- 性能监控，监控请求处理时长等。
+- 通用行为：读取cookie得到用户信息并将用户对象放入请求，从而方便后续流程使用，还有如提取Locale、Theme信息等，只要是多个处理器都需要的即可使用拦截器实现）
+
+**过滤器应用场景**：
+
+1）过滤敏感词汇（防止sql注入）
+2）设置字符编码
+3）URL级别的权限访问控制
+4）压缩响应信息
+
+监听器：依赖web容器，随容器启动而启动，只初始化一次
+
+
+
+
+
+
+
+### 4 post乱码
+
+web.xml添加characterEncodingFilter过滤器
+
+设置过滤器的值，init-param中指定encoding编码
+
+然后启动过滤器forceEncoding为true
+
+
+
+springboot解决方式，配置类继承 ==WebMvcConfigurerAdapter==
+
+```java
+@Configurationpublic 
+class CustomMVCConfiguration extends WebMvcConfigurerAdapter {
+
+	@Bean
+	public HttpMessageConverter<String> responseBodyConverter() {
+		StringHttpMessageConverter converter = new StringHttpMessageConverter(Charset.forName("UTF-8")); 
+		return converter;
+	} 
+	@Override
+	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) { 
+		super.configureMessageConverters(converters);
+		converters.add(responseBodyConverter());
+	} 
+	@Override
+	public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+		configurer.favorPathExtension(false);
+	}
+}
+```
+
+
+
+### 5 SpringMvc 控制器
+
+控制器的单例模式，多线程访问有线程安全问题，解决：controller里面不要写字段，只有映射方法
+
+没有字段，方法间如何共享数据？ @SessionAttributes注解
+
+控制器用@Controller注解标识
+
+请求映射用@RequestMapping作用到方法上，写上RequestMethod的值可以指定get、post拦截方式
+
+如果要得到request或session，只需要在方法形参中声明
+
+### 6 方法返回值
+
+可以返回ModelAndView，String
+
+转发和重定向：在返回值前面添加forword或redirect
+
+返回“success” 就是默认请求转发。也可写成 return "forward:/WEB-INF/pages/success.jsp"
+
+
+
+### 7 ajax返回对象：json数据
+
+加上@ResponseBody注解，将controller返回的对象转换成json，响应给客户端
+
+### 8 常用注解
+
+@RequestParam 
+
+​	把请求的参数赋值给指定名称的形参，@RequestParam("name")String username
+
+@RequestBody 
+
+​	用于获取请求体内容，key-value字符串形式
+
+@PathVariable 
+
+​	绑定url中占位符，比如"/usePathVariable/{id}"，绑定id占位符：@PathVariable("id")
+
+@CookieValue 
+
+​	用于绑定cookie的值到形参，`(@CookieValue(value="JSESSIONID",required=false)
+String cookieValue){`
+
+
+
+@ModelAttribute：
+
+​	修饰方法，会在控制器的方法之前先执行。方法有无返回值都可以
+
+​	修饰参数上，获取指定的数据给参数赋值。
+
+
+
+@SessionAttributes
+
+​	用于控制器的多个方法之间参数共享。value:用于指定存入的属性名称；type:用于指定存入的数据类型。
+
+
+
+
+
+### 9 如何让浏览器支持put，delete请求
+
+由于浏览器 form 表单只支持 GET 与 POST 请求
+
+首先在web.xnl配置 HiddentHttpMethodFilter 过滤器
+
+其次表单用post请求，表单里添加 _method 字段，值为put，delete等
+
+最后过滤器会读取 _method  的值，映射到对应方法
+
+
+
+### 10 springMVC异常
+
+ dao、service、controller层出现的异常会向上抛出，最后由前端控制器交给异常处理器处理
+
+首先自定义异常类，继承Exception
+
+其次自定义异常处理器，实现HandlerExceptionResolver接口，重写异常处理方法
+
+最后配置异常处理器，bean标签或者@Bean注解，配置到spring容器
+
+
+

@@ -31,15 +31,9 @@ hash类型：key-field-value【一个key可以有多个field，可用来存对�
 
 
 
-## 有序集合怎么实现？
+## 有序集合Sorted Set
 
-
-
-类a，类b，spring如何构建循环引用？
-
-
-
-
+采用跳表的数据结构，
 
 ##redis常用命令
 

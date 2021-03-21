@@ -32,13 +32,21 @@ Java 堆是垃圾收集器管理的主要区域，因此也被称作**GC 堆（G
 
 ### 1.2老年代GC
 
-1、老年代满了，触发FullGC
+触发FullGC：
 
-2、FullGC的算法，压缩，慢
+​	1、老年代空间不足：
+
+​		survivor对象晋升：多次youngGC依然存活；或者Survivor中相同年龄对象占所有对象一半以上，会将大于这个年龄的对象晋升老年代
+
+​		大对象直接进入老年代：
+
+​		老年代连续空间不足：
+
+​	2、元空间达到阈值：可以通过-xx:MetaspaceSize 参数调整
 
 ### 1.3GC调优
 
-其实就是减少FullGC
+其实就是减少FullGC，因为FullGC stop the world时间太长。
 
 
 
