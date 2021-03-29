@@ -270,6 +270,21 @@ ViewResolver接口解析View视图。
 
 UrlBasedViewResolver类 通过配置文件，把一个视图名交给到一个View来处理。
 
+## 常用组件
+
+### ArgumentResolver
+
+ArgumentResovler是springmvc为提供的一个处理**controller请求参数**的扩展点
+
+api接口需要拿到一个userId，但是这个userId又不能直接通过http参数拿，可能是传一个token，然后，根据token从服务器取出登录用户的userId
+
+当然一种方案是在interceptor里面解析token拿到userId，然后存入ThreadLocal中；这种就需要我们所有需要用到userId的controller都写一段从ThreadLocal中get的代码；
+
+这里介绍另一种，可能在代码上更简洁。直接在相应的controller方法的参数中写一个userId的入参，但是这个入参不是客户端传的，是在我们的一个ArgumentResovler内部解析传入的，解析也就是token拿到userId的过程。当然我们需要使用注解标注userId参数。
+https://blog.csdn.net/u010900754/article/details/97614139
+
+
+
 ## 面试Spring MVC
 
 ### 1 说说自己对于 Spring MVC 了解?
