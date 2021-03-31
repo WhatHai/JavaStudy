@@ -87,7 +87,7 @@ Netty基本原理：
 
  
 
-## dubbo架构
+## 3、dubbo架构
 
 ![](images/Dubbo%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5.png)
 
@@ -119,7 +119,7 @@ Netty基本原理：
 
 
 
-## 3、dubbo原理
+## 4、dubbo原理
 
 ### 为什么用dubbo不是http
 
@@ -148,9 +148,43 @@ dubbo可以服务治理，比如负载均衡，降级熔断等等
 
    
 
-### 3、dubbo原理  -服务暴露
+### 3、服务暴露
 
-   ![](images/dubbo%E5%8E%9F%E7%90%86%20-%E6%9C%8D%E5%8A%A1%E6%9A%B4%E9%9C%B2.png)
+https://www.toutiao.com/i6870316812458951180/
+
+#### dubbo中的URL
+
+Dubbo 就是采用 URL 的方式来作为约定的参数类型
+
+```
+protocol://username:password@host:port/path?key=value&key=value
+```
+
+- protocol：指的是 dubbo 中的各种协议，如：dubbo thrift http
+- username/password：用户名/密码
+- host/port：主机/端口
+- path：接口的名称
+- parameters：参数键值对
+
+   #### 服务暴露流程
+
+第一步是检测配置，如果有些配置空的话会默认创建，并且组装成 URL 。
+
+第二步是暴露服务，包括暴露到本地的服务和远程的服务。
+
+第三步是注册服务至注册中心
+
+#### 本地暴露
+
+调用exportLocal 方法，修改URL协议为injvm，执行**proxyFactory.getInvoker**方法，生成代理invoker；
+
+然后调用**protocol.export**方法，根据Dubbo spi机制选择对应的protocol协议，将exporter加入ServerConfig中的exporters缓存
+
+#### 远程暴露
+
+和本地暴露一样，需要封装成 Invoker
+
+![](images/dubbo%E5%8E%9F%E7%90%86%20-%E6%9C%8D%E5%8A%A1%E6%9A%B4%E9%9C%B2.png)
 
 ### 4、dubbo原理  -服务引用
 
