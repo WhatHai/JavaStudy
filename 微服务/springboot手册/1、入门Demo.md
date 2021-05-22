@@ -325,6 +325,96 @@ IDE都支持使用Spring的项目创建向导快速创建一个Spring Boot项目
 
 
 
+## 7、其他开发技巧
 
+https://www.toutiao.com/i6943867289838174758/
+
+### 应用启动后执行相关任务
+
+当程序启动完后需要执行一些操作，可以实现ApplicationRunner 或 CommandLineRunner接口。
+
+Runner对应的run方法会在SpringApplication.run方法之前完成。
+
+```
+@SpringBootApplication
+public class SpringBootFunctionsApplication implements ApplicationRunner {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SpringBootFunctionsApplication.class, args);
+		System.out.println("main method invoke...") ;
+	}
+
+	@Override
+	public void run(ApplicationArguments args) throws Exception {
+		System.out.println("应用程序启动完成后通过ApplicationRunner执行相关工作：" +  Arrays.toString(args.getSourceArgs())) ;
+	}
+
+}
+```
+
+
+
+### 程序中访问应用程序启动参数
+
+比如：在定义Bean时需要获取应用程序的启动参数可以通过注入ApplicationArguments实现
+
+示例代码：
+
+```
+@Configuration
+public class ArgumentConfig {
+	
+	@Bean
+	public Object object(ApplicationArguments args) {
+		System.out.println(Arrays.toString(args.getSourceArgs())) ;
+		return new Object() ;
+	}
+	
+}
+```
+
+### 在配置文件中生成随机值
+
+配置文件：
+
+```
+user:
+  password: ${random.value}
+  age: ${random.int(100)}
+  id: ${random.long}
+  uuid: ${random.uuid}
+```
+
+Bean属性：
+
+```
+@Component
+@ConfigurationProperties(prefix = "user")
+public class RandomProperties {
+	
+	private String password ;
+	private int age ;
+	private long id ;
+	private String uuid ;
+}
+```
+
+启动类后输出配置信息：
+
+```java
+@SpringBootApplication
+public class SpringBootFunctionsApplication implements ApplicationRunner, ApplicationContextAware {
+	private ApplicationContext ctx ;
+	public static void main(String[] args) {
+		SpringApplication.run(SpringBootFunctionsApplication.class, args);
+	}
+
+	@Override
+	public void run(ApplicationArguments args) throws Exception {
+		RandomProperties props = this.ctx.getBean(RandomProperties.class) ;
+		System.out.println(props.getUuid() + "\n" + props.getPassword() + "\n" + props.getId() + "\n" + props.getAge()) ;
+	}
+}
+```
 
 

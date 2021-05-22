@@ -241,10 +241,17 @@ public class GiraffeService {
 介绍一些重要的Aware接口：
 
 - **ApplicationContextAware**: 获得ApplicationContext对象,可以用来获取所有Bean definition的名字。
+
+  当一个类实现了这个接口（ApplicationContextAware）之后，这个类就可以方便获得ApplicationContext中的所有bean。换句话说，就是这个类可以直接获取[spring](http://lib.csdn.net/base/javaee)配置文件中，所有有引用到的bean对象。
+
 - **BeanFactoryAware**:获得BeanFactory对象，可以用来检测Bean的作用域。
+
 - **BeanNameAware**:获得Bean在配置文件中定义的名字。
+
 - **ResourceLoaderAware**:获得ResourceLoader对象，可以获得classpath中某个文件。
+
 - **ServletContextAware**:在一个MVC应用中可以获取ServletContext对象，可以读取context中的参数。
+
 - **ServletConfigAware**： 在一个MVC应用中可以获取ServletConfig对象，可以读取config中的参数。
 
 ```java
@@ -477,7 +484,15 @@ spring是先实例化在堆中开辟内存空间；初始化在设置属性。�
 
 解决：三级缓存提前暴露
 
-​	三级缓存：三个map结构
+​	三级缓存：spring的DefaultSingletonBeanRegistry类维护了三个map结构
+
+1.singletonObjects。通常叫它：单例池，容器，它其实就是缓存创建完成单例Bean的地方。
+
+2.singletonFactories。用来映射创建Bean的原始工厂。
+
+3.earlySingletonObjects。它用来映射Bean的早期引用，这意思就是Map里的Bean并不完整，与其称之为Bean，倒不说它只是一个Instance.
+
+
 
 源码：
 

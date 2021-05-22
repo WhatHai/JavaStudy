@@ -267,6 +267,8 @@ Spring Boot 推荐使用 Java 配置而非 XML 配置，但是 Spring Boot 中�
 
 根据@conditional注解进行自动配置并注入bean
 
+**通过配置文件，自动装配所依赖的类，再用动态代理方式注入到spring容器**
+
 ### 自定义starter
 
 https://mp.weixin.qq.com/s/EZzfczJ6vL0yS36wJokV7A
@@ -298,3 +300,18 @@ management.security.enabled = false 可以禁用
 @Component 加入spring容器
 
 如果只需要注入某项的值，使用@Value注解
+
+
+
+### SpringBoot接口防范CSRF攻击
+
+
+
+
+
+
+
+
+
+
+

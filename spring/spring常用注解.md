@@ -1,8 +1,10 @@
-##  `@SpringBootApplication`
+https://www.toutiao.com/i6943161298247139853/
+
+##  @SpringBootApplication`
 
 这里先单独拎出`@SpringBootApplication` 注解说一下，虽然我们一般不会主动去使用它。
 
-*Guide 哥：这个注解是 Spring Boot 项目的基石，创建 SpringBoot 项目之后会默认在主类加上。*
+*这个注解是 Spring Boot 项目的基石，创建 SpringBoot 项目之后会默认在主类加上。*
 
 ```
 @SpringBootApplication
@@ -51,6 +53,8 @@ public @interface SpringBootConfiguration {
 #### 2.1. `@Autowired`
 
 自动导入对象到类中，被注入进的类同样要被 Spring 容器管理比如：Service 类注入到 Controller 类中。
+
+@Autowired按byType自动注入，
 
 ```
 @Service
@@ -121,6 +125,12 @@ public class AppConfig {
 ```
 
 #### 2.6@Resource
+
+@Autowired默认按类型装配（这个注解是属于spring的），默认情况下必须要求依赖对象必须存在，如果要允许null值，可以设置它的required属性为false，如：@Autowired(required=false) ，如果我们想使用名称装配可以结合**@Qualifier**注解进行使用；
+
+@Resource（这个注解属于J2EE的），默认按照名称进行装配，名称可以通过name属性进行指定，如果没有指定name属性，当注解写在字段上时，默认取字段名进行安装名称查找，如果注解写在setter方法上默认取属性名进行装配。当找不到与名称匹配的bean时才按照类型进行装配。但是需要注意的是，如果name属性一旦指定，就只会按照名称进行装配
+
+Spring将@Resource注解的name属性解析为bean的名字，而type属性则解析为bean的类型。所以如果使用name属性，则使用byName的自动注入策略，而使用type属性时则使用byType自动注入策略。如果既不指定name也不指定type属性，这时将通过反射机制使用byName自动注入策略
 
 
 

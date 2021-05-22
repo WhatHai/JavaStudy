@@ -96,6 +96,10 @@ hessian=com.alibaba.dubbo.rpc.protocol.hessian.HessianProtocol
 
 通过这个url中的参数不同，就可以控制动态使用不同的组件实现类
 
+## SPI对比
+
+https://juejin.cn/post/6950266942875779108
+
 # 3 扩展Dubbo组件
 
 自己写个工程，可以打成jar包的那种哦

@@ -558,6 +558,10 @@ public Object getObjectInclNullById(Integer id) {
 
 
 
+延时双删不能严格保证一致性：
+
+​	如果一个线程读取，另一个线程马上要更新，拿到旧数据。
+
 ##如何快速删除一万个key
 
 使用管道
@@ -584,7 +588,13 @@ public Object getObjectInclNullById(Integer id) {
 
 一致性Hash算法在服务节点太少时，容易因为节点分部不均匀而造成数据倾斜（被缓存的对象大部分集中缓存在某一台服务器上）问题
 
+## 热点数据量庞大如何保证redis性能
 
+1、集群部署redis服务器
+
+2、本地缓存在应用服务器里面，减轻了部分redis压力。
+
+如何设计本地缓存：
 
 
 
