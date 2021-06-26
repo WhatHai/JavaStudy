@@ -1,5 +1,5 @@
 ---
-title: Linux常用命令总结
+touchtitle: Linux常用命令总结
 date: 2018-09-23 09:32:00
 type: 技术文字
 tags: Linux
@@ -108,7 +108,40 @@ katex:
 - **/run**：
   是一个临时文件系统，存储系统启动以来的信息。当系统重启时，这个目录下的文件应该被删掉或清除。如果你的系统上有 /var/run 目录，应该让它指向 run。
 
-### 目录操作命令
+## help
+
+获取帮助。
+
+help cd     #查看cd命令帮助信息
+
+### man
+
+查看ls命令的帮助信息：man ls
+
+## 常用快捷键
+
+ctrl + c  停止进程
+
+ctrl + l   清屏，彻底清屏：rest
+
+ctrl + q  退出
+
+tab建： 提示
+
+## 系统服务管理
+
+### systemctl
+
+- 启动服务：systemctl start httpd.service
+- 关闭服务：systemctl stop httpd.service
+- 重启服务（不管是否在运行）：systemctl restart httpd.service
+- 重新载入配置（不中断服务）：systemctl reload httpd.service
+- 查看运行状态：systemctl status httpd.service
+- 设置开机启动：systemctl enable httpd.service
+- 禁止开机启动：systemctl disable httpd.service
+- 查看系统安装的服务：systemctl list-units --type=service
+
+## 文件操作命令
 
 #### ls 列出目录	
 
@@ -308,23 +341,17 @@ mv 目录名称 目录的新位置： 移动目录的位置---剪切（改）
    - -b：覆盖前先备份
    - -t：指定mv目录，适用于多个源文件移动到一个目录
 
-## help
+#### touch
 
-获取帮助。
+创建一个文件：touch a.txt
 
-help cd     #查看cd命令帮助信息
+#### tar
 
-## 常用快捷键
-
-ctrl + c  停止进程
-
-ctrl + l   清屏，彻底清屏：rest
-
-ctrl + q  退出
-
-tab建： 提示
-
-
+- 打包文件夹到单独的文件：tar -cvf /opt/etc.tar /etc
+- 压缩文件夹到压缩文件（gzip）：tar -zcvf /opt/etc.tar.gz /etc
+- 压缩文件夹到压缩文件（bzip2）：tar -jcvf /opt/etc.tar.bz2 /etc
+- 查阅压缩包中内容（gzip）：tar -ztvf /opt/etc.tar.gz /etc
+- 解压文件到当前目录（gzip）：tar -zxvf /opt/etc.tar.gz
 
 ## 文件内容查看
 
@@ -487,50 +514,50 @@ ls -l
 
 ### 更改文件属性
 
-1. chgrp：更改文件属组
+#### chgrp：更改文件属组
 
-   ```
-   chgrp [-R] 属组名 文件名
-   ```
+```
+chgrp [-R] 属组名 文件名
+```
 
-   -R：递归改文件属组
+-R：递归改文件属组
 
-2. chown：更改文件拥有者，也可同时更改文件属组
+#### chown：更改文件拥有者，也可同时更改文件属组
 
-   ```
-   chown [–R] 属主名 文件名
-   chown [-R] 属主名：属组名 文件名
-   ```
+```
+chown [–R] 属主名 文件名
+chown [-R] 属主名：属组名 文件名
+```
 
-3. chmod：更改文件9个属性
+#### chmod：更改文件9个属性
 
-   权限对应数字：r：4；w：2；x：1
+权限对应数字：r：4；w：2；x：1
 
-   owner = rwx = 4+2+1 = 7
+owner = rwx = 4+2+1 = 7
 
-   group = rwx = 4+2+1 = 7
+group = rwx = 4+2+1 = 7
 
-   others= --- = 0+0+0 = 0
+others= --- = 0+0+0 = 0
 
-   ```shell
-   chmod 777 .bashrc
-   ```
+```shell
+chmod 777 .bashrc
+```
 
-   4.符号类型改变文件权限
+4.符号类型改变文件权限
 
-   u代表user；g代表group；o代表others；a代表all
+u代表user；g代表group；o代表others；a代表all
 
-   |       | u    | + 加入 | r    |
-   | ----- | ---- | ------ | ---- |
-   | chmod | g    | - 除去 | w    |
-   |       | o    | = 设定 | x    |
-   |       | a    |        |      |
+|       | u    | + 加入 | r    |
+| ----- | ---- | ------ | ---- |
+| chmod | g    | - 除去 | w    |
+|       | o    | = 设定 | x    |
+|       | a    |        |      |
 
-   ```
-   chmod  a+x test1
-   ```
+```
+chmod  a+x test1
+```
 
-   给test1 的所有用户添加执行权限
+给test1 的所有用户添加执行权限
 
 
 
@@ -716,7 +743,7 @@ vim 文件------>进入文件----->命令模式------>按i进入编辑模式----
 
 ### 用户管理
 
-1、添加
+#### 1、添加
 
 ```
 useradd 选项 用户名
@@ -744,7 +771,7 @@ useradd 选项 用户名
 
 - -u 用户号 指定用户的用户号，如果同时有-o选项，则可以重复使用其他用户的标识号。
 
-2、删除用户
+#### 2、删除用户
 
 ```
 userdel 选项 用户名
@@ -758,9 +785,11 @@ userdel 选项 用户名
 >
 > 删除用户sam在系统文件中（主要是/etc/passwd, /etc/shadow, /etc/group等）的记录，同时删除用户的主目录
 
-3、修改账号
+#### 3、修改账号密码
 
-4、用户口令管理
+​	修改root密码：passwd root
+
+#### 4、用户口令管理
 
 > ```
 > passwd 选项 用户名
@@ -772,6 +801,17 @@ userdel 选项 用户名
 - -f 强迫用户下次登录时修改口令
 
 > 用户账号刚创建时没有口令，但是被系统锁定，无法使用，必须为其指定口令后才可以使用，即使是指定空口令
+
+#### 5、切换用户
+
+```
+su -
+```
+
+#### 6、who查看当前登录详情和运行级别
+
+- 查看当前运行级别：who -r
+- 显示用的登录详情：who -buT
 
 
 
@@ -872,20 +912,9 @@ du /usr/local
 
 用于磁盘分区
 
-## yum命令
+### free
 
-- 1.列出所有可更新的软件清单命令：yum check-update
-- 2.更新所有软件命令：yum update
-- 3.仅安装指定的软件命令：yum install <package_name>
-- 4.仅更新指定的软件命令：yum update <package_name>
-- 5.列出所有可安裝的软件清单命令：yum list
-- 6.删除软件包命令：yum remove <package_name>
-- 7.查找软件包 命令：yum search <keyword>
-- 8.清除缓存命令:
-  - yum clean packages: 清除缓存目录下的软件包
-  - yum clean headers: 清除缓存目录下的 headers
-  - yum clean oldheaders: 清除缓存目录下旧的 headers
-  - yum clean, yum clean all (= yum clean packages; yum clean oldheaders) :清除缓存目录下的软件包及旧的headers
+以MB显示内存使用状态：free -m
 
 ## 网络命令
 
@@ -942,9 +971,48 @@ ifconfig eth0 hw ether 00:AA:BB:CC:DD:EE
 - `-s` 字节数：指定发送的数据字节数，预设值是`56`，加上8字节的ICMP头，一共是64ICMP数据字节。
 - `-t` 存活数值：设置存活数值`TTL`的大小。
 
-### netstat -an
+### netstat
 
-- 查看当前系统的端口使用
+- 查看当前系统的端口使用：netstat -an
+- 查看路由信息：netstat -rn
+- 查看所有有效TCP连接：netstat -an
+- 查看系统中启动的监听服务：netstat -tulnp
+- 查看处于连接状态的系统资源信息：netstat -atunp
+
+### wget
+
+从网络上下载软件
+
+### iptables
+
+- 开启防火墙：systemctl start iptables.service
+- 关闭防火墙：systemctl stop iptables.service
+- 查看防火墙状态：systemctl status iptables.service
+- 设置开机启动：systemctl enable iptables.service
+- 禁用开机启动：systemctl disable iptables.service
+- 查看filter表的链信息：iptables -L -n
+- 查看NAT表的链信息：iptables -t nat -L -n
+- 清除防火墙所有规则：iptables -F;iptables -X;iptables -Z;
+- 添加过滤规则（开发80端口）：iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+- 查找规则所做行号：iptables -L INPUT --line-numbers -n
+- 根据行号删除过滤规则：iptables -D INPUT 1
+
+## 软件安装管理
+
+- 列出所有可更新的软件清单命令：yum check-update
+- 更新所有软件命令：yum update
+- 在资源库中查找软件包信息：yum info nginx*
+- 列出已经安装的所有软件包：yum info installed
+- 仅安装指定的软件命令：yum install <package_name>
+- 仅更新指定的软件命令：yum update <package_name>
+- 列出所有可安裝的软件清单命令：yum list
+- 删除软件包命令：yum remove <package_name>
+- 查找软件包 命令：yum search  <package_name>
+- 清除缓存命令:
+  - yum clean packages: 清除缓存目录下的软件包
+  - yum clean headers: 清除缓存目录下的 headers
+  - yum clean oldheaders: 清除缓存目录下旧的 headers
+  - yum clean, yum clean all (= yum clean packages; yum clean oldheaders) :清除缓存目录下的软件包及旧的headers
 
 ## 其他
 
@@ -1039,6 +1107,12 @@ diff file1.txt file2.txt
 ​	==kill -9 进程的pid：==  杀死进程（-9 表示强制终止。）
 
 ​	先用ps查找进程，然后用kill杀掉
+
+### top
+
+查看系统当前活跃进程信息
+
+
 
 ![linux命令](images/linux命令.png)
 
