@@ -3,11 +3,7 @@ java学习笔记、work日常、面试汇总
 
 
 
-#收藏博客
-
-https://github.com/doocs/advanced-java
-
-
+##收藏博客
 
 https://juejin.im/post/5d5033c86fb9a06b031fefca
 
@@ -33,10 +29,19 @@ https://juejin.im/post/5d5033c86fb9a06b031fefca
 
 
 
-B站好视频
+nginx负载均衡配置：https://www.cnblogs.com/toutou/p/nginx_conf.html
+
+## java面试笔记：
+
+1、https://gitee.com/SnailClimb/JavaGuide
+
+2、进阶知识扫盲：https://github.com/doocs/advanced-java
+
+​	消息队列，搜索引擎，缓存，分库分表等；
+
+## B站好视频
 
 https://mp.weixin.qq.com/s/X3jBxjlbTVFT70oNXKzsdw
 
+a
 
-
-nginx负载均衡配置：https://www.cnblogs.com/toutou/p/nginx_conf.html
