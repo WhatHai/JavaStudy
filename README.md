@@ -27,6 +27,8 @@ https://juejin.im/post/5d5033c86fb9a06b031fefca
 
 [线程池引发的故障](https://mp.weixin.qq.com/s/Ful9iyMjYZzxpK12MI04fA)
 
+nginx反向代理，负载均衡：https://juejin.cn/post/6844904190565679112
+
 
 
 nginx负载均衡配置：https://www.cnblogs.com/toutou/p/nginx_conf.html
