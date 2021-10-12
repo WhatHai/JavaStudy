@@ -36,11 +36,11 @@ Redis相比Memcached来说，拥有更多的数据结构和并支持更丰富的
 - 但是redis目前是原生支持cluster模式的，redis官方就是支持redis cluster集群模式的，比memcached来说要更好
 
 ## 4.2 Redis的线程模型
-![](https://img-blog.csdnimg.cn/20190511180551350.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzMzNTg5NTEw,size_16,color_FFFFFF,t_70)
+![](images/redis线程模型.png)
 ### 4.2.1 文件事件处理器
 redis基于reactor模式开发了==网络事件处理器==，这个处理器叫做文件事件处理器，file event handler
 
-这个文件事件处理器，是==单线程的==，redis才叫做单线程的模型，采用==IO多路复用机制==同时监听多个socket，根据socket上的事件来选择对应的==事件处理器==来处理这个事件。
+这个==文件事件处理器==，是==单线程的==，redis才叫做单线程的模型，采用==IO多路复用机制==同时监听多个socket，根据socket上的事件来选择对应的==事件处理器==来处理这个事件。
 
 如果被监听的socket准备好执行`accept`、`read`、`write`、`close`等操作时，跟操作对应的文件事件就会产生，这个时候文件事件处理器就会调用之前关联好的事件处理器来处理对应事件。
 

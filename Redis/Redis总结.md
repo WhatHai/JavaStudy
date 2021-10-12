@@ -609,6 +609,12 @@ public Object getObjectInclNullById(Integer id) {
 
 如何设计本地缓存：
 
+## Redis 哈希槽
+
+答：Redis 集群没有使用一致性 hash,而是引入了哈希槽的概念，Redis 集群有16384 个哈希槽，每个 key 通过 CRC16 校验后对 16384 取模来决定放置哪个槽，集群的每个节点负责一部分 hash 槽。
+
+
+
 
 
 ### 参考

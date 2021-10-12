@@ -29,7 +29,7 @@ https://juejin.im/post/5d5033c86fb9a06b031fefca
 
 nginx反向代理，负载均衡：https://juejin.cn/post/6844904190565679112
 
-
+springcloud微服务组件学习文档 http://c.biancheng.net/view/5434.html
 
 nginx负载均衡配置：https://www.cnblogs.com/toutou/p/nginx_conf.html
 

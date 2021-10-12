@@ -84,7 +84,7 @@ MyISAM是MySQL的默认数据库引擎（5.5版之前）。虽然性能极佳，
 
 **两者的对比：**
 
-1. **是否支持行级锁** : MyISAM 只有表级锁(table-level locking)，而InnoDB 支持行级锁(row-level locking)和表级锁,默认为行级锁。
+1. **是否支持行级锁** : MyISAM 只有表级锁(table-level locking)，而InnoDB 支持行级锁(row-level locking)和表级锁,默认为行级锁。MyISAM 也是合适的比如读密集的情况
 2. **是否支持事务和崩溃后的安全恢复： MyISAM** 强调的是性能，每次查询具有原子性,其执行速度比InnoDB类型更快，但是不提供事务支持。但是**InnoDB** 提供事务**支持事务**，外部键等高级数据库功能。 具有事务(commit)、回滚(rollback)和崩溃修复能力(crash recovery capabilities)的事务安全(transaction-safe (ACID compliant))型表。
 3. **是否支持外键：** MyISAM不支持，而InnoDB支持。
 4. **是否支持MVCC** ：仅 InnoDB 支持。应对高并发事务, MVCC比单纯的加锁更高效;MVCC只在 `READ COMMITTED` 和 `REPEATABLE READ` 两个隔离级别下工作;MVCC可以使用 乐观(optimistic)锁 和 悲观(pessimistic)锁来实现;各数据库中MVCC实现并不统一。推荐阅读：[MySQL-InnoDB-MVCC多版本并发控制](https://segmentfault.com/a/1190000012650596)
@@ -111,6 +111,8 @@ InnoDB 底层存储结构为 B+树， B 树的每个节点对应 **innodb 的一
 
 
 #### 为何myisam比iniodb块
+
+Myisam 数据文件和索引文件分开存储
 
 Myisam文件结构如下：
 
@@ -383,7 +385,7 @@ ALTER TABLE `table_name` ADD INDEX index_name ( `column1`, `column2`, `column3` 
 
 #### 索引如何提升查找速度
 
-mysql数据存储结构是页，
+mysql数据==存储结构是页==，
 
 - **各个数据页可以组成一个双向链表**
 - 每个数据页中的记录又可以组成一个**单向链表**
@@ -730,6 +732,8 @@ Mysql中语句的执行都是都是分层执行，每一层执行的任务都不
 [MySQL高性能优化规范建议](https://www.cnblogs.com/huchong/p/10219318.html)
 
 ### 一条SQL语句执行得很慢的原因有哪些？
+
+https://mikechen.cc/3305.html
 
 [腾讯面试：一条SQL语句执行得很慢的原因有哪些？---不看后悔系列](https://mp.weixin.qq.com/s?__biz=Mzg2OTA0Njk0OA==&mid=2247485185&idx=1&sn=66ef08b4ab6af5757792223a83fc0d45&chksm=cea248caf9d5c1dc72ec8a281ec16aa3ec3e8066dbb252e27362438a26c33fbe842b0e0adf47&token=79317275&lang=zh_CN#rd)
 

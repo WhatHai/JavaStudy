@@ -12,15 +12,15 @@ MySQL高并发，做到了，那么也是通过一系列复杂的分库分表，
 - 其次，再经过良好的整体的缓存架构的设计（多级缓存架构、热点缓存），支撑真正的上十万，甚至上百万的高并发
 
 # 2 Redis不能支撑高并发的瓶颈
-单机
-![](https://img-blog.csdnimg.cn/20190506220559684.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzMzNTg5NTEw,size_16,color_FFFFFF,t_70)
+单机redis并发量支持上万到几万
+![](images/单机redis并发量.png)
 
 # 3 如果redis要支撑超过10万+的并发，何如？
 单机的Redis几乎不太可能说QPS超过10万+，除非一些特殊情况，比如你的机器性能特别好，配置特别高，物理机，维护做的特别好，而且你的整体的操作不是太复杂
 
 ==单机在几万==
 
-读写分离，一般来说，对缓存，一般都是用来支撑读高并发的，写的请求是比较少的，可能写请求也就一秒钟几千，一两千
+==读写分离==，一般来说，对缓存，一般都是用来支撑读高并发的，写的请求是比较少的，可能写请求也就一秒钟几千，一两千
 
 大量的请求都是读，一秒钟二十万次读
 
@@ -28,7 +28,7 @@ MySQL高并发，做到了，那么也是通过一系列复杂的分库分表，
 
 主从架构 -> 读写分离 -> 支撑10万+读QPS的架构
 
-![](https://img-blog.csdnimg.cn/20190506220626223.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzMzNTg5NTEw,size_16,color_FFFFFF,t_70)
+![](images/redis主从-10万QPS.png)
 
 # 4 接下来要讲解的一个topic
 redis replication
