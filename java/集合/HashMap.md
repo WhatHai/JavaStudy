@@ -175,7 +175,20 @@ static final class TreeNode<K,V> extends LinkedHashMap.Entry<K,V> {
                 r = p;
        }
 ```
+## 并发线程安全问题
+
+多线程下 HashMap 的问题（这里主要说死循环问题）：
+
+- 多线程 put 操作后，get 操作导致死循环；
+- 多线程 put 非 null 元素后，get 操作得到 null 值；
+- 多线程 put 操作，导致元素丢失。
+
+HashMap采用数组 + 链表，hash冲突采用拉链法解决，1.7采用头插发，新元素放在链表头部，扩容容易出现环形链表，形成死循环。1.8头插法换成尾插法了，
+
+
+
 ## HashMap源码分析
+
 ### 构造方法
 
 HashMap 中有四个构造方法，它们分别如下：
