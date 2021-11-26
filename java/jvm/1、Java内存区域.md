@@ -8,7 +8,22 @@ JVM启动流程
 
 ![JVM启动流程](images/JVM启动流程.png)
 
+## 对象的构成
+
+[jvm对象](https://www.cnblogs.com/jajian/p/13681781.html#:~:text=%E5%9C%A8JVM%20%E4%B8%AD%EF%BC%8CJava%E5%AF%B9%E8%B1%A1,%E4%BF%A1%E6%81%AF%EF%BC%8C%E5%AF%B9%E8%B1%A1%E5%AD%97%E6%AE%B5%E5%B1%9E%E6%80%A7%E4%BF%A1%E6%81%AF%E3%80%82)
+
+java对象保存在堆中，有三部分组成
+
+- **对象头（object header）**：包括了关于堆对象的布局、类型、GC状态、同步状态和标识哈希码的基本信息。Java对象和vm内部对象都有一个共同的对象头格式。
+- **实例数据（Instance Data）**：主要是存放类的数据信息，父类的信息，对象字段属性信息。
+- **对齐填充（Padding）**：为了字节对齐，填充的数据，不是必须的。
+
+
+
+
+
 ## 二 运行时数据区域
+
 Java 虚拟机在执行 Java 程序的过程中会把它管理的内存划分成若干个不同的数据区域。JDK. 1.8 和之前的版本略有不同，下面会介绍到。
 
 **JDK 1.8 之前：**

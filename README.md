@@ -41,6 +41,8 @@ nginx负载均衡配置：https://www.cnblogs.com/toutou/p/nginx_conf.html
 
 ​	消息队列，搜索引擎，缓存，分库分表等；
 
+springcloud笔记https://blog.csdn.net/u011863024/article/details/114298282
+
 ## B站好视频
 
 https://mp.weixin.qq.com/s/X3jBxjlbTVFT70oNXKzsdw

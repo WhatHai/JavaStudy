@@ -33,6 +33,8 @@ int y = x;         // 拆箱 调用了 X.intValue()
 - Integer是不可变类型，缓存机制-128~127之间，
 - int不能和泛型结合使用，
 
+
+
 ## 缓存池
 
 new Integer(123) 与 Integer.valueOf(123) 的区别在于：

@@ -643,6 +643,8 @@ InnoDB 存储引擎在 **分布式事务** 的情况下一般会用到 **SERIALI
 
 https://mp.weixin.qq.com/s/D9_nTfQJqr6ziJzPkl3l7A
 
+### 分库分表性能
+
 
 
 ### 数据库连接池?
@@ -713,6 +715,8 @@ https://mp.weixin.qq.com/s/D9_nTfQJqr6ziJzPkl3l7A
 
 [一条SQL语句在MySQL中如何执行的](<https://mp.weixin.qq.com/s?__biz=Mzg2OTA0Njk0OA==&mid=2247485097&idx=1&sn=84c89da477b1338bdf3e9fcd65514ac1&chksm=cea24962f9d5c074d8d3ff1ab04ee8f0d6486e3d015cfd783503685986485c11738ccb542ba7&token=79317275&lang=zh_CN#rd>)
 
+
+
 ### select和update怎么执行
 
 https://www.toutiao.com/i6925236642320073229/?tt_from=weixin&utm_campaign=client_share&wxshare_count=1&timestamp=1616294058&app=news_article&utm_source=weixin&utm_medium=toutiao_android&use_new_style=1&req_id=202103211034180101351680722963E74E&share_token=595fd4e8-6715-4a39-a7d6-70878bd45e84&group_id=6925236642320073229
@@ -724,6 +728,18 @@ Mysql中语句的执行都是都是分层执行，每一层执行的任务都不
 ![mysql语句执行流程](images/mysql语句执行流程.png)
 
 
+
+### 定位慢sql
+
+开启慢查询日志功能，
+
+### mysql执行计划
+
+[mysql执行计划](https://zhuanlan.zhihu.com/p/164897114#:~:text=%E5%AE%9A%E4%BD%8D%E6%85%A2SQL%E7%9B%B8%E5%AF%B9%E6%9D%A5,%E5%AE%9A%E6%97%B6%E9%97%B4%E8%8C%83%E5%9B%B4%E5%86%85%E7%9A%84)
+
+explain命令：sql性能分析工具。
+
+这个执行计划会告诉我们SQL中表的读取顺序、查询类型、用到了什么索引、使用索引的长度 、扫描了多少条记录等信息，通过执行计划提供的信息我们可以快速定位到哪些地方可以进行优化
 
 
 

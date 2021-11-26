@@ -338,7 +338,7 @@ MVC 是一种设计模式,Spring MVC 是一款很优秀的 MVC 框架。Spring M
 
 ​		postHandler 方法执行完，再从后往前执行afterCompletion方法
 
-![springMVC拦截器执行流程](/Users/hayder/Documents/JavaStudy/spring/images/springMVC%E6%8B%A6%E6%88%AA%E5%99%A8%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B.png)
+![springMVC拦截器执行流程](images/springMVC%E6%8B%A6%E6%88%AA%E5%99%A8%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B.png)
 
 **应用：**
 
@@ -367,8 +367,8 @@ public class LogCostInterceptor implements HandlerInterceptor { long start = Sys
 ```java
 @Configuration 
 public class InterceptorConfig extends WebMvcConfigurerAdapter {
- 
-    @Override public void addInterceptors(InterceptorRegistry registry) {
+    @Override 
+    public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new LogCostInterceptor()).addPathPatterns("/**"); 
         super.addInterceptors(registry);
     }
@@ -387,7 +387,6 @@ public class InterceptorConfig extends WebMvcConfigurerAdapter {
 ```java
 @Configuration
 public class FilterConfig {
-
     @Bean
     public FilterRegistrationBean registrationBean() {
        ** FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(new** **MyFilter());**
